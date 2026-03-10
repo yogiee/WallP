@@ -28,10 +28,26 @@
 - Launch at login support
 - macOS 26 Liquid Glass UI
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/menu-bar-window.png" width="280" alt="Menu bar popover">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings-window-account.png" width="420" alt="Settings — General">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/settings-window-timing.png" width="420" alt="Settings — Timing">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings-window-cache.png" width="420" alt="Settings — Cache">
+</p>
+
 ## Installation
 
-1. Download `WallP.zip` from the [Releases](../../releases) page
-2. Unzip and move `WallP.app` to your `/Applications` folder
+1. Download `WallP.dmg` from the [Releases](../../releases) page
+2. Open the DMG and drag **WallP** to your `/Applications` folder
 3. Right-click the app and select **Open** (required on first launch since the app is not notarized)
 4. WallP appears in your menu bar
 
@@ -83,7 +99,7 @@ WallP will automatically switch collections when you activate that Focus mode.
 Requires Xcode 26.3 or later.
 
 ```bash
-git clone https://github.com/yourusername/WallP.git
+git clone https://github.com/yogiee/WallP.git
 cd WallP
 open WallP.xcodeproj
 ```
