@@ -27,6 +27,9 @@ struct SettingsView: View {
 
             cacheTab
                 .tabItem { Label("Cache", systemImage: "internaldrive") }
+
+            updatesTab
+                .tabItem { Label("Updates", systemImage: "arrow.down.circle") }
         }
         .frame(width: 500, height: 420)
         .onAppear {
@@ -266,6 +269,32 @@ struct SettingsView: View {
 
                 Button("Clear All Cache", role: .destructive) {
                     clearCache()
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .padding()
+    }
+
+    // MARK: - Updates Tab
+
+    private var updatesTab: some View {
+        Form {
+            Section("Automatic Updates") {
+                Picker("Update behavior", selection: Binding(
+                    get: { UpdaterService.shared.updateMode },
+                    set: { UpdaterService.shared.updateMode = $0 }
+                )) {
+                    Text("Auto-update (recommended)").tag(0)
+                    Text("Download updates, ask before installing").tag(1)
+                    Text("Disabled").tag(2)
+                }
+                .pickerStyle(.radioGroup)
+            }
+
+            Section {
+                Button("Check for Updates…") {
+                    UpdaterService.shared.checkForUpdates()
                 }
             }
         }
