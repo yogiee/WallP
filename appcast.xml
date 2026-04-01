@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>WallP</title>
+        <link>https://github.com/yogiee/WallP</link>
+        <description>WallP update feed</description>
+        <language>en</language>
+
+        <!-- Add new releases at the top. Sparkle picks the highest sparkle:version that
+             satisfies sparkle:minimumSystemVersion. Run ./scripts/build-app.sh to get
+             the edSignature and length values to paste in here. -->
+
+        <item>
+            <title>WallP 1.3</title>
+            <pubDate>Tue, 01 Apr 2026 00:00:00 +0000</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>1.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h3>WallP 1.3</h3>
+                <ul>
+                    <li>Added Sparkle auto-update support — WallP can now update itself automatically</li>
+                    <li>New Updates tab in Settings with configurable update behavior</li>
+                    <li>Check for Updates available in the app menu</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/v1.3.0/WallP-1.3.dmg"
+                sparkle:version="4"
+                sparkle:shortVersionString="1.3"
+                sparkle:edSignature="nPbY8QUfuuR+znj3xevtKQPPU+Olm9tiqydDehRfndRI3DRD7ywFE+/Z4UWzQYoD92WwbeugPYfMzOBCbWy+CA=="
+                length="1733695"
+                type="application/x-apple-diskimage"/>
+        </item>
+
+    </channel>
+</rss>

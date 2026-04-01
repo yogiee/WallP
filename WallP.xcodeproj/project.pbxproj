@@ -21,6 +21,8 @@
 		A10012 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* AppSettings.swift */; };
 		A10013 /* WallPFocusFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10013 /* WallPFocusFilter.swift */; };
 		A10014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10014 /* Assets.xcassets */; };
+		A10015 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = P10002 /* Sparkle */; };
+		A10017 /* UpdaterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* UpdaterService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,7 @@
 		B10014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10016 /* WallP.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WallP.entitlements; sourceTree = "<group>"; };
+		B10017 /* UpdaterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterService.swift; sourceTree = "<group>"; };
 		B10099 /* WallP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WallP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -48,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10015 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +107,7 @@
 				B10007 /* WallpaperRotator.swift */,
 				B10008 /* SyncScheduler.swift */,
 				B10009 /* SystemStateMonitor.swift */,
+				B10017 /* UpdaterService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -149,6 +154,9 @@
 			dependencies = (
 			);
 			name = WallP;
+			packageProductDependencies = (
+				P10002 /* Sparkle */,
+			);
 			productName = WallP;
 			productReference = B10099 /* WallP.app */;
 			productType = "com.apple.product-type.application";
@@ -177,6 +185,9 @@
 				Base,
 			);
 			mainGroup = D10001;
+			packageReferences = (
+				P10001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = D10099 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -215,6 +226,7 @@
 				A10011 /* Collection.swift in Sources */,
 				A10012 /* AppSettings.swift in Sources */,
 				A10013 /* WallPFocusFilter.swift in Sources */,
+				A10017 /* UpdaterService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,7 +345,7 @@
 				CODE_SIGN_ENTITLEMENTS = WallP/WallP.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -346,7 +358,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -362,7 +374,7 @@
 				CODE_SIGN_ENTITLEMENTS = WallP/WallP.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -375,7 +387,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -385,6 +397,25 @@
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		P10001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P10002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = P10001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
 		F10001 /* Build configuration list for PBXProject "WallP" */ = {

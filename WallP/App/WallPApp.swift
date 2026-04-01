@@ -5,6 +5,9 @@ import AppIntents
 struct WallPApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
+    // Hold a reference so Sparkle starts with the app
+    private let updaterService = UpdaterService.shared
+
     var body: some Scene {
         MenuBarExtra("WallP", image: "MenuBarIcon") {
             MenuBarPopover()
@@ -13,6 +16,13 @@ struct WallPApp: App {
 
         Settings {
             SettingsView()
+        }
+        .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    UpdaterService.shared.checkForUpdates()
+                }
+            }
         }
     }
 }
