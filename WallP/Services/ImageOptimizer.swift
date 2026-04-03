@@ -100,6 +100,29 @@ actor ImageOptimizer {
             finalImage = cgImage
         }
 
+        // Center-crop portrait/narrow images to the screen's aspect ratio.
+        // macOS wallpaper scaling fills the screen height and clips horizontal overflow,
+        // so images narrower than the screen produce pillar-box bars. Cropping the image
+        // height to match the screen aspect ratio ensures it fills wall-to-wall.
+        let screenAspect = targetAspectRatio()
+        let imgAspect = CGFloat(finalImage.width) / CGFloat(finalImage.height)
+        let imageToEncode: CGImage
+        if imgAspect < screenAspect - 0.05 {
+            let cropHeight = Int((CGFloat(finalImage.width) / screenAspect).rounded())
+            let yOffset = (finalImage.height - cropHeight) / 2
+            if cropHeight > 0, yOffset >= 0,
+               let cropped = finalImage.cropping(to: CGRect(
+                   x: 0, y: yOffset,
+                   width: finalImage.width, height: cropHeight
+               )) {
+                imageToEncode = cropped
+            } else {
+                imageToEncode = finalImage
+            }
+        } else {
+            imageToEncode = finalImage
+        }
+
         // Encode
         let outputType: CFString
         let quality: CGFloat
@@ -124,7 +147,7 @@ actor ImageOptimizer {
             kCGImageDestinationLossyCompressionQuality: quality,
             kCGImageDestinationEmbedThumbnail: true
         ]
-        CGImageDestinationAddImage(destination, finalImage, destOptions as CFDictionary)
+        CGImageDestinationAddImage(destination, imageToEncode, destOptions as CFDictionary)
 
         guard CGImageDestinationFinalize(destination) else {
             try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
@@ -142,6 +165,17 @@ actor ImageOptimizer {
                 let backingRect = screen.convertRectToBacking(screen.frame)
                 return max(backingRect.width, backingRect.height)
             }.max() ?? 3840
+        }
+    }
+
+    /// Returns the widest screen's aspect ratio (width/height) in backing pixels.
+    /// Used to center-crop narrow images so they fill the screen without pillar-box bars.
+    func targetAspectRatio() -> CGFloat {
+        DispatchQueue.main.sync {
+            NSScreen.screens.map { screen in
+                let r = screen.convertRectToBacking(screen.frame)
+                return r.width / r.height
+            }.max() ?? (16.0 / 9.0)
         }
     }
 }

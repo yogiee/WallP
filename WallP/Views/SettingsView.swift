@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var fetchError: String?
     @State private var cacheSize: String = "Calculating..."
     @State private var selectedWallhavenCollection: Int?
+    @State private var updateMode: Int = UserDefaults.standard.integer(forKey: "updateMode")
 
     var body: some View {
         TabView {
@@ -28,8 +29,8 @@ struct SettingsView: View {
             cacheTab
                 .tabItem { Label("Cache", systemImage: "internaldrive") }
 
-            updatesTab
-                .tabItem { Label("Updates", systemImage: "arrow.down.circle") }
+            aboutTab
+                .tabItem { Label("About", systemImage: "info.circle") }
         }
         .frame(width: 500, height: 420)
         .onAppear {
@@ -276,30 +277,79 @@ struct SettingsView: View {
         .padding()
     }
 
-    // MARK: - Updates Tab
+    // MARK: - About Tab
 
-    private var updatesTab: some View {
-        Form {
-            Section("Automatic Updates") {
-                Picker("Update behavior", selection: Binding(
-                    get: { UpdaterService.shared.updateMode },
-                    set: { UpdaterService.shared.updateMode = $0 }
-                )) {
-                    Text("Auto-update (recommended)").tag(0)
-                    Text("Download updates, ask before installing").tag(1)
-                    Text("Disabled").tag(2)
-                }
-                .pickerStyle(.radioGroup)
-            }
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
 
-            Section {
-                Button("Check for Updates…") {
-                    UpdaterService.shared.checkForUpdates()
+    private var aboutTab: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                // Identity
+                VStack(spacing: 8) {
+                    if let icon = NSImage(named: NSImage.applicationIconName) {
+                        Image(nsImage: icon)
+                            .resizable()
+                            .frame(width: 80, height: 80)
+                            .onTapGesture {
+                                NSWorkspace.shared.open(URL(string: "https://github.com/yogiee/WallP")!)
+                            }
+                            .onHover { hovering in
+                                if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+                            }
+                    }
+
+                    Text("WallP")
+                        .font(.title2.weight(.semibold))
+
+                    Text("Version \(appVersion)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Text("by Yogi Gharat")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Link("github.com/yogiee/WallP",
+                         destination: URL(string: "https://github.com/yogiee/WallP")!)
+                        .font(.subheadline)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 24)
+                .padding(.bottom, 20)
+
+                Divider()
+                    .padding(.horizontal, 20)
+
+                // Updates
+                VStack(alignment: .leading, spacing: 10) {
+                    GroupBox {
+                        Picker("", selection: $updateMode) {
+                            Text("Auto-update (recommended)").tag(0)
+                            Text("Download updates, ask before installing").tag(1)
+                            Text("Disabled").tag(2)
+                        }
+                        .pickerStyle(.radioGroup)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .onChange(of: updateMode) { _, newValue in
+                            UpdaterService.shared.updateMode = newValue
+                        }
+                    } label: {
+                        Text("Automatic Updates")
+                    }
+
+                    GroupBox {
+                        Button("Check for Updates…") {
+                            UpdaterService.shared.checkForUpdates()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding(20)
             }
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Actions
