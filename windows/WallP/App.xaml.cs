@@ -19,14 +19,26 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        _host = Host.CreateDefaultBuilder()
-            .ConfigureServices(ConfigureServices)
-            .Build();
+        try
+        {
+            _host = Host.CreateDefaultBuilder()
+                .ConfigureServices(ConfigureServices)
+                .Build();
 
-        await _host.StartAsync();
+            await _host.StartAsync();
 
-        var trayHost = Services.GetRequiredService<TrayIconHost>();
-        trayHost.Show();
+            var trayHost = Services.GetRequiredService<TrayIconHost>();
+            trayHost.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Startup failed:\n\n{ex}",
+                "WallP — startup error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)
