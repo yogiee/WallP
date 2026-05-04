@@ -68,11 +68,14 @@ public sealed class TrayIconHost : IDisposable
         _icon = null;
     }
 
+    private MenuItem? _pauseItem;
+
     private ContextMenu BuildMenu()
     {
         var menu = new ContextMenu();
 
-        menu.Items.Add(MenuItem("Pause", _ => { /* TODO: rotator.Stop() / .Start() */ }));
+        _pauseItem = MenuItem("Pause", _ => TogglePause());
+        menu.Items.Add(_pauseItem);
         menu.Items.Add(MenuItem("Shuffle", async _ => await SafeRun(() => _rotator.ShuffleAsync())));
         menu.Items.Add(MenuItem("Sync now", async _ => await SafeRun(() => _sync.SyncNowAsync())));
         menu.Items.Add(new Separator());
@@ -83,7 +86,20 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Quit WallP", _ => Application.Current.Shutdown()));
 
+        // Refresh the Pause/Resume label every time the menu opens so it reflects
+        // current state even if pause was toggled from elsewhere.
+        menu.Opened += (_, _) =>
+        {
+            if (_pauseItem is not null)
+                _pauseItem.Header = _settings.IsPaused ? "Resume" : "Pause";
+        };
+
         return menu;
+    }
+
+    private void TogglePause()
+    {
+        if (_settings.IsPaused) _rotator.Resume(); else _rotator.Pause();
     }
 
     private void ShowAddCollectionDialog()

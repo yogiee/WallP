@@ -31,9 +31,36 @@ public partial class App : Application
             var trayHost = Services.GetRequiredService<TrayIconHost>();
             trayHost.Show();
 
-            // Start the sync scheduler — will run an initial sync if collections exist
-            // but the cache is empty, then fire on a timer per AppSettings.SyncInterval.
-            Services.GetRequiredService<SyncScheduler>().Start();
+            var settings = Services.GetRequiredService<AppSettings>();
+            var sync = Services.GetRequiredService<SyncScheduler>();
+            var rotator = Services.GetRequiredService<WallpaperRotator>();
+
+            // When sync finishes, kick the rotator if it's idle and we have new images.
+            // Marshals to the UI thread because rotator's INotifyPropertyChanged is bound
+            // to UI in the Settings window.
+            sync.SyncCompleted += (_, args) =>
+            {
+                if (args.NewImageCount <= 0) return;
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (!rotator.IsRunning && !settings.IsPaused)
+                    {
+                        rotator.Start();
+                        _ = rotator.NextWallpaperAsync();
+                    }
+                });
+            };
+
+            sync.Start();
+
+            // Start the rotator immediately if the cache is already populated from a
+            // previous run, and apply a fresh wallpaper right away — otherwise the
+            // user would wait a full RotationInterval before seeing anything change.
+            if (settings.CachedImages.Count > 0 && !settings.IsPaused)
+            {
+                rotator.Start();
+                _ = rotator.NextWallpaperAsync();
+            }
         }
         catch (Exception ex)
         {
