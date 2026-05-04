@@ -22,7 +22,7 @@ public partial class SettingsWindow : FluentWindow
             [CollectionsItem] = () => _services.GetRequiredService<CollectionsPage>(),
             [TimingItem] = () => _services.GetRequiredService<TimingPage>(),
             [CacheItem] = () => _services.GetRequiredService<CachePage>(),
-            [AboutItem] = () => PlaceholderPage("About — coming soon"),
+            [AboutItem] = () => _services.GetRequiredService<AboutPage>(),
         };
 
         // Default to General on first open. WPF-UI's NavigationView doesn't expose a

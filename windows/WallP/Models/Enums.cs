@@ -41,3 +41,10 @@ public enum ImageFormat
     [Description("JPEG (universal, recommended)")] Jpeg,
     [Description("HEIC (smaller, requires HEIF Image Extension)")] Heic,
 }
+
+public enum UpdateMode
+{
+    [Description("Auto-update (recommended)")] Auto,
+    [Description("Download updates, ask before installing")] Ask,
+    [Description("Disabled")] Disabled,
+}

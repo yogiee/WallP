@@ -119,6 +119,13 @@ public sealed class AppSettings : INotifyPropertyChanged
         set => Set(ref _launchAtLogin, value);
     }
 
+    private UpdateMode _updateMode = UpdateMode.Auto;
+    public UpdateMode UpdateMode
+    {
+        get => _updateMode;
+        set => Set(ref _updateMode, value);
+    }
+
     public List<WallPCollection> Collections { get; set; } = [];
     public List<CachedImage> CachedImages { get; set; } = [];
 

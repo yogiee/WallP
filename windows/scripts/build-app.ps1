@@ -67,6 +67,29 @@ Compress-Archive -Path $PublishDir -DestinationPath $ZipPath -CompressionLevel O
 $ZipSize = (Get-Item $ZipPath).Length
 Write-Host ("         {0:N1} MB  $AppName-$Version.zip" -f ($ZipSize / 1MB))
 
+# Sign ZIP for NetSparkle update verification (best-effort — needs the
+# netsparkle-generate-appcast tool installed and the ed25519 private key
+# at %LOCALAPPDATA%\netsparkle\NetSparkle_Ed25519.priv).
+$NetSparkleTool = Join-Path $env:USERPROFILE ".dotnet\tools\netsparkle-generate-appcast.exe"
+if (Test-Path $NetSparkleTool) {
+    Write-Host "  Signing ZIP for NetSparkle..."
+    $SignOutput = & $NetSparkleTool --generate-signature $ZipPath 2>&1
+    $Signature = ($SignOutput | Select-String -Pattern '^[A-Za-z0-9+/=]{80,}$' | Select-Object -First 1).Line
+    if ($Signature) {
+        Write-Host ""
+        Write-Host "  *** Update appcast-windows.xml with:"
+        Write-Host "      sparkle:version=`"$Version`""
+        Write-Host "      sparkle:edSignature=`"$Signature`""
+        Write-Host "      length=`"$ZipSize`""
+    } else {
+        Write-Host "  Note: signing produced no signature line. Output:"
+        Write-Host "    $SignOutput"
+    }
+} else {
+    Write-Host "  Note: netsparkle-generate-appcast not found — skipping signature."
+    Write-Host "        Install with: dotnet tool install --global NetSparkleUpdater.Tools.AppCastGenerator"
+}
+
 Write-Host ""
 Write-Host "=== Build complete ==="
 Write-Host "  App: $PublishDir\$AppName.exe"

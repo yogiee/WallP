@@ -53,6 +53,9 @@ public partial class App : Application
 
             sync.Start();
 
+            // Start the auto-update background loop unless disabled in settings.
+            Services.GetRequiredService<UpdaterService>().StartIfEnabled();
+
             // Start the rotator immediately if the cache is already populated from a
             // previous run, and apply a fresh wallpaper right away — otherwise the
             // user would wait a full RotationInterval before seeing anything change.
@@ -104,5 +107,6 @@ public partial class App : Application
         services.AddTransient<CollectionsPage>();
         services.AddTransient<TimingPage>();
         services.AddTransient<CachePage>();
+        services.AddTransient<AboutPage>();
     }
 }
