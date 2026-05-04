@@ -103,5 +103,6 @@ public partial class App : Application
         services.AddTransient<GeneralPage>();
         services.AddTransient<CollectionsPage>();
         services.AddTransient<TimingPage>();
+        services.AddTransient<CachePage>();
     }
 }
