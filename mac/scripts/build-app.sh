@@ -1,8 +1,8 @@
 #!/bin/bash
 # Build WallP as a release .app, DMG, and ZIP
-# Usage: ./scripts/build-app.sh [release|debug]
+# Usage (from repo root): ./mac/scripts/build-app.sh [release|debug]
 #
-# Output (build/):
+# Output (mac/build/):
 #   WallP.app      — run or drag to /Applications for local testing
 #   WallP.dmg      — installer DMG (release only)
 #   WallP.zip      — zip archive  (release only)
@@ -33,6 +33,7 @@ else
 fi
 
 xcodebuild \
+    -project "$PROJECT_DIR/$APP_NAME.xcodeproj" \
     -scheme "$APP_NAME" \
     -configuration "$XCODE_CONFIG" \
     -derivedDataPath "$DERIVED_DIR" \
