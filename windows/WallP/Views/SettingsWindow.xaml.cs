@@ -19,7 +19,7 @@ public partial class SettingsWindow : FluentWindow
         _pageFactories = new Dictionary<NavigationViewItem, Func<UIElement>>
         {
             [GeneralItem] = () => _services.GetRequiredService<GeneralPage>(),
-            [CollectionsItem] = () => PlaceholderPage("Collections — coming soon"),
+            [CollectionsItem] = () => _services.GetRequiredService<CollectionsPage>(),
             [TimingItem] = () => PlaceholderPage("Timing — coming soon"),
             [CacheItem] = () => PlaceholderPage("Cache — coming soon"),
             [AboutItem] = () => PlaceholderPage("About — coming soon"),
