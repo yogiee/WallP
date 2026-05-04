@@ -20,7 +20,7 @@ public partial class SettingsWindow : FluentWindow
         {
             [GeneralItem] = () => _services.GetRequiredService<GeneralPage>(),
             [CollectionsItem] = () => _services.GetRequiredService<CollectionsPage>(),
-            [TimingItem] = () => PlaceholderPage("Timing — coming soon"),
+            [TimingItem] = () => _services.GetRequiredService<TimingPage>(),
             [CacheItem] = () => PlaceholderPage("Cache — coming soon"),
             [AboutItem] = () => PlaceholderPage("About — coming soon"),
         };

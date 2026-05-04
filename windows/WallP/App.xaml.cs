@@ -102,5 +102,6 @@ public partial class App : Application
         services.AddTransient<SettingsWindow>();
         services.AddTransient<GeneralPage>();
         services.AddTransient<CollectionsPage>();
+        services.AddTransient<TimingPage>();
     }
 }
