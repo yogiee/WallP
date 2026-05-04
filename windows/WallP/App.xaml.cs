@@ -30,6 +30,10 @@ public partial class App : Application
 
             var trayHost = Services.GetRequiredService<TrayIconHost>();
             trayHost.Show();
+
+            // Start the sync scheduler — will run an initial sync if collections exist
+            // but the cache is empty, then fire on a timer per AppSettings.SyncInterval.
+            Services.GetRequiredService<SyncScheduler>().Start();
         }
         catch (Exception ex)
         {

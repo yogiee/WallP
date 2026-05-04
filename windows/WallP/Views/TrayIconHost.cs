@@ -77,12 +77,40 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(MenuItem("Sync now", async _ => await SafeRun(() => _sync.SyncNowAsync())));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Apply image…  (debug)", async _ => await ApplyImageFromPickerAsync()));
+        menu.Items.Add(MenuItem("Add Wallhaven collection…  (debug)", _ => ShowAddCollectionDialog()));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Settings…", _ => OpenSettings()));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Quit WallP", _ => Application.Current.Shutdown()));
 
         return menu;
+    }
+
+    private void ShowAddCollectionDialog()
+    {
+        var dialog = new AddCollectionDialog(_settings)
+        {
+            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible),
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        var collection = new WallPCollection
+        {
+            Name = dialog.DisplayName,
+            WallhavenCollectionId = dialog.CollectionId,
+            WallhavenUsername = dialog.Username,
+        };
+        _settings.Collections.Add(collection);
+        _settings.DefaultCollectionId ??= collection.Id;
+        _settings.Save();
+
+        // Kick off a sync of the new collection in the background.
+        _ = Task.Run(async () =>
+        {
+            try { await _sync.SyncCollectionAsync(collection.Id); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[WallP] Initial sync error: {ex}"); }
+        });
     }
 
     private async Task ApplyImageFromPickerAsync()
