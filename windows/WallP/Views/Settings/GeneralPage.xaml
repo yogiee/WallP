@@ -1,0 +1,136 @@
+<UserControl x:Class="WallP.Views.Settings.GeneralPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+        <StackPanel MaxWidth="640" HorizontalAlignment="Stretch">
+
+            <ui:TextBlock Text="General"
+                          FontTypography="TitleLarge"
+                          Margin="0,0,0,16" />
+
+            <!-- Wallhaven Account -->
+            <ui:CardExpander Margin="0,0,0,12" IsExpanded="True">
+                <ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Wallhaven account" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Your API key and Wallhaven username." FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardExpander.Header>
+
+                <StackPanel Margin="4">
+                    <ui:TextBlock Text="API key" Margin="0,4,0,4" />
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:PasswordBox x:Name="ApiKeyBox"
+                                        Grid.Column="0"
+                                        PlaceholderText="Paste your Wallhaven API key"
+                                        PasswordChanged="ApiKeyBox_PasswordChanged" />
+                        <ui:Button x:Name="ValidateButton"
+                                   Grid.Column="1"
+                                   Content="Validate"
+                                   Margin="8,0,0,0"
+                                   Appearance="Primary"
+                                   Click="ValidateButton_Click" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12" x:Name="ValidationStatusPanel" Visibility="Collapsed">
+                        <ui:SymbolIcon x:Name="ValidationIcon" Symbol="Checkmark24" FontSize="16" Margin="0,0,6,0" />
+                        <ui:TextBlock x:Name="ValidationLabel" FontTypography="Caption" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <ui:TextBlock Text="Username" Margin="0,4,0,4" />
+                    <ui:TextBox x:Name="UsernameBox"
+                                PlaceholderText="Your Wallhaven username (for collections)"
+                                Text="{Binding WallhavenUsername, UpdateSourceTrigger=LostFocus}"
+                                Margin="0,0,0,4" />
+                    <ui:HyperlinkButton Content="Get an API key at wallhaven.cc/settings/account"
+                                        NavigateUri="https://wallhaven.cc/settings/account"
+                                        Margin="0,4,0,0" />
+                </StackPanel>
+            </ui:CardExpander>
+
+            <!-- Startup -->
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Launch at login" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Start WallP automatically when you sign in to Windows."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="LaunchAtLoginToggle" Checked="LaunchAtLoginToggle_Toggled" Unchecked="LaunchAtLoginToggle_Toggled" />
+            </ui:CardControl>
+
+            <!-- Pause Conditions -->
+            <ui:CardExpander Margin="0,0,0,12" IsExpanded="True">
+                <ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Pause wallpaper changes" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="When to suspend the rotation timer."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardExpander.Header>
+
+                <StackPanel Margin="4">
+                    <ui:CardControl Margin="0,0,0,8">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock Text="When a fullscreen app is running" />
+                                <ui:TextBlock Text="Games, video, presentations — anything fullscreen."
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding PauseOnFullscreen, Mode=TwoWay}" />
+                    </ui:CardControl>
+
+                    <ui:CardControl Margin="0,0,0,8">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock Text="When on battery power" />
+                                <ui:TextBlock Text="Save power on laptops not plugged in."
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding PauseOnBattery, Mode=TwoWay}" />
+                    </ui:CardControl>
+
+                    <ui:CardControl>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock Text="Skip syncing on metered networks" />
+                                <ui:TextBlock Text="Avoid downloads on cellular hotspots and capped connections."
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding RespectMeteredNetwork, Mode=TwoWay}" />
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
+            <!-- Notifications -->
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Show notification on sync complete" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="A toast notification appears when new wallpapers are synced."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding ShowSyncCompleteToast, Mode=TwoWay}" />
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using WallP.Models;
 using WallP.Services;
 using WallP.Views;
+using WallP.Views.Settings;
 
 namespace WallP;
 
@@ -64,8 +65,10 @@ public partial class App : Application
         services.AddSingleton<SystemStateMonitor>();
         services.AddSingleton<PauseConditionMonitor>();
         services.AddSingleton<UpdaterService>();
+        services.AddSingleton<StartupRegistrationService>();
 
         services.AddSingleton<TrayIconHost>();
         services.AddTransient<SettingsWindow>();
+        services.AddTransient<GeneralPage>();
     }
 }
