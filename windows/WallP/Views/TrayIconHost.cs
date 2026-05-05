@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using WallP.Models;
 using WallP.Services;
 
@@ -14,19 +13,16 @@ public sealed class TrayIconHost : IDisposable
     private readonly AppSettings _settings;
     private readonly WallpaperRotator _rotator;
     private readonly SyncScheduler _sync;
-    private readonly DesktopWallpaperService _wallpaper;
     private TaskbarIcon? _icon;
 
     public TrayIconHost(
         AppSettings settings,
         WallpaperRotator rotator,
-        SyncScheduler sync,
-        DesktopWallpaperService wallpaper)
+        SyncScheduler sync)
     {
         _settings = settings;
         _rotator = rotator;
         _sync = sync;
-        _wallpaper = wallpaper;
     }
 
     public void Show()
@@ -79,9 +75,6 @@ public sealed class TrayIconHost : IDisposable
         menu.Items.Add(MenuItem("Shuffle", async _ => await SafeRun(() => _rotator.ShuffleAsync())));
         menu.Items.Add(MenuItem("Sync now", async _ => await SafeRun(() => _sync.SyncNowAsync())));
         menu.Items.Add(new Separator());
-        menu.Items.Add(MenuItem("Apply image…  (debug)", async _ => await ApplyImageFromPickerAsync()));
-        menu.Items.Add(MenuItem("Add Wallhaven collection…  (debug)", _ => ShowAddCollectionDialog()));
-        menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Settings…", _ => OpenSettings()));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Quit WallP", _ => Application.Current.Shutdown()));
@@ -100,64 +93,6 @@ public sealed class TrayIconHost : IDisposable
     private void TogglePause()
     {
         if (_settings.IsPaused) _rotator.Resume(); else _rotator.Pause();
-    }
-
-    private void ShowAddCollectionDialog()
-    {
-        var dialog = new AddCollectionDialog(_settings)
-        {
-            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsVisible),
-        };
-
-        if (dialog.ShowDialog() != true) return;
-
-        var collection = new WallPCollection
-        {
-            Name = dialog.DisplayName,
-            WallhavenCollectionId = dialog.CollectionId,
-            WallhavenUsername = dialog.Username,
-        };
-        _settings.Collections.Add(collection);
-        _settings.DefaultCollectionId ??= collection.Id;
-        _settings.Save();
-
-        // Kick off a sync of the new collection in the background.
-        _ = Task.Run(async () =>
-        {
-            try { await _sync.SyncCollectionAsync(collection.Id); }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[WallP] Initial sync error: {ex}"); }
-        });
-    }
-
-    private async Task ApplyImageFromPickerAsync()
-    {
-        var dialog = new OpenFileDialog
-        {
-            Title = "Pick an image to set as wallpaper",
-            Filter = "Images|*.jpg;*.jpeg;*.png;*.bmp;*.heic;*.webp|All files|*.*",
-            CheckFileExists = true,
-        };
-
-        if (dialog.ShowDialog() != true) return;
-
-        try
-        {
-            var monitors = _wallpaper.GetMonitors();
-            await _wallpaper.SetWallpaperAllMonitorsAsync(dialog.FileName);
-            MessageBox.Show(
-                $"Wallpaper applied to {monitors.Count} monitor(s).",
-                "WallP",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                $"Failed to set wallpaper:\n\n{ex.Message}",
-                "WallP",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
     }
 
     private static async Task SafeRun(Func<Task> action)
