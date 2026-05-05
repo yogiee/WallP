@@ -2,8 +2,8 @@
 # Usage (from repo root): .\windows\scripts\build-app.ps1 [Release|Debug]
 #
 # Output (windows/build/):
-#   WallP\WallP.exe       — portable executable + dependencies
-#   WallP-X.Y.Z.zip       — zip archive  (Release only)
+#   WallP\WallP.exe       - portable executable + dependencies
+#   WallP-X.Y.Z.zip       - zip archive  (Release only)
 
 [CmdletBinding()]
 param(
@@ -67,14 +67,15 @@ Compress-Archive -Path $PublishDir -DestinationPath $ZipPath -CompressionLevel O
 $ZipSize = (Get-Item $ZipPath).Length
 Write-Host ("         {0:N1} MB  $AppName-$Version.zip" -f ($ZipSize / 1MB))
 
-# Sign ZIP for NetSparkle update verification (best-effort — needs the
+# Sign ZIP for NetSparkle update verification (best-effort - needs the
 # netsparkle-generate-appcast tool installed and the ed25519 private key
 # at %LOCALAPPDATA%\netsparkle\NetSparkle_Ed25519.priv).
 $NetSparkleTool = Join-Path $env:USERPROFILE ".dotnet\tools\netsparkle-generate-appcast.exe"
 if (Test-Path $NetSparkleTool) {
     Write-Host "  Signing ZIP for NetSparkle..."
     $SignOutput = & $NetSparkleTool --generate-signature $ZipPath 2>&1
-    $Signature = ($SignOutput | Select-String -Pattern '^[A-Za-z0-9+/=]{80,}$' | Select-Object -First 1).Line
+    # Tool prints "Signature: <base64>" — extract the base64 portion.
+    $Signature = ($SignOutput | Select-String -Pattern 'Signature:\s+([A-Za-z0-9+/=]+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Select-Object -First 1)
     if ($Signature) {
         Write-Host ""
         Write-Host "  *** Update appcast-windows.xml with:"
@@ -86,7 +87,7 @@ if (Test-Path $NetSparkleTool) {
         Write-Host "    $SignOutput"
     }
 } else {
-    Write-Host "  Note: netsparkle-generate-appcast not found — skipping signature."
+    Write-Host "  Note: netsparkle-generate-appcast not found - skipping signature."
     Write-Host "        Install with: dotnet tool install --global NetSparkleUpdater.Tools.AppCastGenerator"
 }
 
@@ -95,4 +96,4 @@ Write-Host "=== Build complete ==="
 Write-Host "  App: $PublishDir\$AppName.exe"
 Write-Host "  ZIP: $ZipPath"
 Write-Host ""
-Write-Host "To run:     & '$PublishDir\$AppName.exe'"
+Write-Host "To run:     $PublishDir\$AppName.exe"

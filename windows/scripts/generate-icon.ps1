@@ -3,7 +3,7 @@
 #
 # Output: windows/WallP/Assets/WallP.ico
 #
-# Sizes: 16, 24, 32, 48, 64, 128, 256 (PNG-encoded entries — Vista+ supports this).
+# Sizes: 16, 24, 32, 48, 64, 128, 256 (PNG-encoded entries - Vista+ supports this).
 
 [CmdletBinding()]
 param(
