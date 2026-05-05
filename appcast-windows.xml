@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>WallP for Windows</title>
+        <description>Most recent updates to WallP for Windows</description>
+        <language>en</language>
+        <item>
+            <title>Version 0.1.0</title>
+            <pubDate>Tue, 05 May 2026 04:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/windows-v0.1.0/WallP-0.1.0.zip"
+                sparkle:version="0.1.0"
+                sparkle:edSignature="SQAGjmNgEeP3xB9TaXoW5JlGFcMAjYTra39dPugm2X3k2TOc0xpj1+vK0fnmyEE2OdSaUoeZk38+Imfz0VfFBw=="
+                length="11126252"
+                type="application/octet-stream" />
+        </item>
+    </channel>
+</rss>

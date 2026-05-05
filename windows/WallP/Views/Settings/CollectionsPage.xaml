@@ -1,0 +1,150 @@
+<Page x:Class="WallP.Views.Settings.CollectionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+        <StackPanel MaxWidth="680" HorizontalAlignment="Stretch">
+
+            <ui:TextBlock Text="Collections"
+                          FontTypography="TitleLarge"
+                          Margin="0,0,0,16" />
+
+            <!-- Existing collections list -->
+            <ItemsControl x:Name="CollectionsList"
+                          Margin="0,0,0,16"
+                          HorizontalContentAlignment="Stretch">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ui:CardControl Margin="0,0,0,8">
+                            <ui:CardControl.Header>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:TextBlock Text="{Binding Name}" FontTypography="BodyStrong" VerticalAlignment="Center" />
+                                        <Border Visibility="{Binding DefaultBadgeVisibility}"
+                                                Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                                CornerRadius="8"
+                                                Padding="6,1"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="DEFAULT"
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <ui:TextBlock Text="{Binding MetaLine}"
+                                                  FontTypography="Caption"
+                                                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                  Margin="0,2,0,0" />
+                                </StackPanel>
+                            </ui:CardControl.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:Button Content="Set default"
+                                           Tag="{Binding Id}"
+                                           Click="SetDefault_Click"
+                                           Visibility="{Binding SetDefaultVisibility}"
+                                           Margin="0,0,8,0" />
+                                <ui:Button Tag="{Binding Id}"
+                                           Click="Delete_Click"
+                                           Appearance="Caution"
+                                           ToolTip="Remove collection">
+                                    <ui:SymbolIcon Symbol="Delete24" />
+                                </ui:Button>
+                            </StackPanel>
+                        </ui:CardControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ui:TextBlock x:Name="EmptyHint"
+                          Text="No collections yet. Add one below."
+                          FontTypography="Caption"
+                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                          HorizontalAlignment="Center"
+                          Margin="0,16,0,16"
+                          Visibility="Collapsed" />
+
+            <!-- Add from Wallhaven -->
+            <ui:CardExpander IsExpanded="True">
+                <ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Add from Wallhaven" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Fetches your collections using the API key from the General tab."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardExpander.Header>
+
+                <StackPanel Margin="4">
+                    <StackPanel x:Name="MissingCredentialsPanel"
+                                Orientation="Horizontal"
+                                Margin="0,0,0,8"
+                                Visibility="Collapsed">
+                        <ui:SymbolIcon Symbol="Warning24" Margin="0,0,6,0" />
+                        <ui:TextBlock Text="Set your API key and username in the General tab first."
+                                      FontTypography="Caption"
+                                      VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Button x:Name="FetchButton"
+                                   Grid.Column="0"
+                                   Content="Fetch my collections"
+                                   Appearance="Primary"
+                                   Click="Fetch_Click" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center">
+                            <ui:ProgressRing x:Name="FetchSpinner"
+                                             IsIndeterminate="True"
+                                             Width="20"
+                                             Height="20"
+                                             Visibility="Collapsed" />
+                            <ui:TextBlock x:Name="FetchStatus"
+                                          FontTypography="Caption"
+                                          VerticalAlignment="Center"
+                                          Margin="6,0,0,0" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid x:Name="PickerRow" Visibility="Collapsed" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="AvailablePicker"
+                                  Grid.Column="0"
+                                  DisplayMemberPath="Display"
+                                  SelectedValuePath="Source"
+                                  SelectionChanged="AvailablePicker_SelectionChanged" />
+                        <ui:Button x:Name="AddButton"
+                                   Grid.Column="1"
+                                   Content="Add"
+                                   Appearance="Primary"
+                                   Margin="8,0,0,0"
+                                   IsEnabled="False"
+                                   Click="Add_Click" />
+                    </Grid>
+
+                    <ui:TextBlock x:Name="ErrorLabel"
+                                  FontTypography="Caption"
+                                  Foreground="#E81C3A"
+                                  Margin="0,4,0,0"
+                                  Visibility="Collapsed" />
+                </StackPanel>
+            </ui:CardExpander>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

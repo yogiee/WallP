@@ -29,3 +29,13 @@ WORKSPACE/
 
 # Memory bank (internal dev notes)
 memory-bank/
+
+# Claude Code workspace config (per-machine, not for sharing)
+.claude/
+
+# Windows / .NET (placeholder — populated when Windows project is scaffolded)
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/

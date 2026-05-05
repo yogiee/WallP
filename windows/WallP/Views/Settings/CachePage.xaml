@@ -1,0 +1,145 @@
+<Page x:Class="WallP.Views.Settings.CachePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+        <StackPanel MaxWidth="640" HorizontalAlignment="Stretch">
+
+            <ui:TextBlock Text="Cache"
+                          FontTypography="TitleLarge"
+                          Margin="0,0,0,16" />
+
+            <!-- Image optimization -->
+            <ui:CardExpander Margin="0,0,0,12" IsExpanded="True">
+                <ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Image optimization" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Downscale and re-encode images to save space."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardExpander.Header>
+
+                <StackPanel Margin="4">
+                    <ui:CardControl Margin="0,0,0,8">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock Text="Optimize cached images" />
+                                <ui:TextBlock Text="Resize to your largest screen and re-encode. Typical savings: 70–90%."
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch x:Name="OptimizeToggle"
+                                         IsChecked="{Binding OptimizeImages, Mode=TwoWay}" />
+                    </ui:CardControl>
+
+                    <ui:CardControl Margin="0,0,0,8">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <ui:TextBlock Text="Image format" />
+                                <ui:TextBlock x:Name="FormatHint"
+                                              Text=""
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ComboBox x:Name="FormatPicker"
+                                  MinWidth="220"
+                                  DisplayMemberPath="Display"
+                                  SelectedValuePath="Value"
+                                  SelectionChanged="FormatPicker_SelectionChanged" />
+                    </ui:CardControl>
+
+                    <ui:CardControl>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:TextBlock Text="Blur" />
+                                    <ui:TextBlock x:Name="BlurValueLabel"
+                                                  Text=" — off"
+                                                  FontTypography="Caption"
+                                                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                  Margin="6,0,0,0"
+                                                  VerticalAlignment="Center" />
+                                </StackPanel>
+                                <ui:TextBlock Text="Useful for HTPC / gaming PCs where the desktop is rarely visible. Applies to new syncs only."
+                                              FontTypography="Caption"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <Slider x:Name="BlurSlider"
+                                Width="180"
+                                Minimum="0"
+                                Maximum="50"
+                                IsSnapToTickEnabled="True"
+                                TickFrequency="1"
+                                ValueChanged="BlurSlider_ValueChanged" />
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
+            <!-- Cache limits -->
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Max images per collection" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Older images beyond this limit are pruned on the next sync."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="CacheLimitPicker"
+                          MinWidth="160"
+                          DisplayMemberPath="Display"
+                          SelectedValuePath="Value"
+                          SelectionChanged="CacheLimitPicker_SelectionChanged" />
+            </ui:CardControl>
+
+            <!-- Storage -->
+            <ui:CardExpander IsExpanded="True">
+                <ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Storage" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="What's currently on disk."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardExpander.Header>
+
+                <StackPanel Margin="4">
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Grid.Column="0" Text="Cache size" />
+                        <ui:TextBlock Grid.Column="1"
+                                      x:Name="CacheSizeLabel"
+                                      Text="—"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Grid.Column="0" Text="Total cached images" />
+                        <ui:TextBlock Grid.Column="1"
+                                      x:Name="CachedCountLabel"
+                                      Text="—"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <ui:Button x:Name="ClearAllButton"
+                               Content="Clear all cache"
+                               Appearance="Caution"
+                               Click="ClearAll_Click"
+                               HorizontalAlignment="Left" />
+                </StackPanel>
+            </ui:CardExpander>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,84 @@
+<Page x:Class="WallP.Views.Settings.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
+        <StackPanel MaxWidth="640" HorizontalAlignment="Stretch">
+
+            <!-- Identity -->
+            <StackPanel HorizontalAlignment="Center"
+                        Margin="0,16,0,32">
+                <Image x:Name="IconImage"
+                       Source="pack://application:,,,/Assets/AppIcon-512.png"
+                       Width="120"
+                       Height="120"
+                       Cursor="Hand"
+                       MouseLeftButtonUp="OpenGitHub_Click"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       HorizontalAlignment="Center" />
+
+                <ui:TextBlock Text="WallP"
+                              FontTypography="Title"
+                              HorizontalAlignment="Center"
+                              Margin="0,12,0,0" />
+                <ui:TextBlock x:Name="VersionLabel"
+                              FontTypography="Body"
+                              HorizontalAlignment="Center"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Margin="0,4,0,0" />
+                <ui:TextBlock Text="by Yogi Gharat"
+                              FontTypography="Body"
+                              HorizontalAlignment="Center"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Margin="0,2,0,0" />
+                <ui:HyperlinkButton Content="github.com/yogiee/WallP"
+                                    NavigateUri="https://github.com/yogiee/WallP"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Automatic updates -->
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Automatic updates" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="How WallP handles new versions when they're available."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="UpdateModePicker"
+                          MinWidth="260"
+                          DisplayMemberPath="Display"
+                          SelectedValuePath="Value"
+                          SelectionChanged="UpdateModePicker_SelectionChanged" />
+            </ui:CardControl>
+
+            <!-- Manual check -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Check for updates" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="Look for a newer version right now."
+                                      FontTypography="Caption"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:Button x:Name="CheckButton"
+                               Content="Check now"
+                               Appearance="Primary"
+                               Click="Check_Click" />
+                    <ui:ProgressRing x:Name="CheckSpinner"
+                                     IsIndeterminate="True"
+                                     Width="20"
+                                     Height="20"
+                                     Visibility="Collapsed"
+                                     Margin="12,0,0,0" />
+                </StackPanel>
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

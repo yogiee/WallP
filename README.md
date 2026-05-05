@@ -1,11 +1,15 @@
 <p align="center">
-  <img src="WallP/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="128" alt="WallP">
+  <img src="mac/WallP/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="128" alt="WallP">
 </p>
 
 <h1 align="center">WallP</h1>
 
 <p align="center">
-  A macOS menu bar app that automatically rotates your desktop wallpaper using your <a href="https://wallhaven.cc">Wallhaven</a> collections.
+  A menu bar / system tray app that automatically rotates your desktop wallpaper using your <a href="https://wallhaven.cc">Wallhaven</a> collections.
+</p>
+
+<p align="center">
+  Available for <strong>macOS</strong> (released) — <strong>Windows</strong> port in progress.
 </p>
 
 ---
@@ -96,19 +100,26 @@ WallP will automatically switch collections when you activate that Focus mode.
 
 ## Building from Source
 
+### macOS
+
 Requires Xcode 26.3 or later.
 
 ```bash
 git clone https://github.com/yogiee/WallP.git
 cd WallP
-open WallP.xcodeproj
+open mac/WallP.xcodeproj
 ```
 
-Build and run with **Cmd+R**, or build a Release binary:
+Build and run with **Cmd+R**, or use the build script:
 
 ```bash
-xcodebuild -scheme WallP -configuration Release build
+./mac/scripts/build-app.sh         # release: produces mac/build/WallP.{app,dmg,zip}
+./mac/scripts/build-app.sh debug   # debug: produces mac/build/WallP.app only
 ```
+
+### Windows
+
+In progress. The Windows port lives in `windows/` and will be a WPF + .NET 8 app.
 
 ## License
 
