@@ -13,9 +13,9 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
-    <Version>0.1.1</Version>
-    <FileVersion>0.1.1.0</FileVersion>
-    <AssemblyVersion>0.1.1.0</AssemblyVersion>
+    <Version>0.1.2</Version>
+    <FileVersion>0.1.2.0</FileVersion>
+    <AssemblyVersion>0.1.2.0</AssemblyVersion>
     <!-- Don't append the git commit SHA to InformationalVersion. NetSparkle reads
          this property for the "you have X" comparison and shows it verbatim, so
          the SHA leaks into the user-facing update dialog. -->
