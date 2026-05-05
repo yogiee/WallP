@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.IO;
 using NetSparkleUpdater;
 using NetSparkleUpdater.Enums;
+using NetSparkleUpdater.Interfaces;
 using NetSparkleUpdater.SignatureVerifiers;
 using NetSparkleUpdater.UI.WPF;
 using WallP.Models;
@@ -39,6 +41,7 @@ public sealed class UpdaterService
                     new Ed25519Checker(SecurityMode.Strict, Ed25519PublicKey))
                 {
                     UIFactory = new UIFactory(),
+                    LogWriter = new FileLogWriter(),
                 };
                 ApplyMode();
             }
@@ -88,6 +91,36 @@ public sealed class UpdaterService
         {
             Debug.WriteLine($"[WallP][Updater] Check failed: {ex.Message}");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Writes NetSparkle's diagnostics to %LOCALAPPDATA%\WallP\netsparkle.log so we can
+    /// see what's happening when the published WinExe build fails — there's no console
+    /// to log to in that mode.
+    /// </summary>
+    private sealed class FileLogWriter : ILogger
+    {
+        private static readonly string LogPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "WallP",
+            "netsparkle.log");
+
+        private static readonly object Sync = new();
+
+        public void PrintMessage(string message, params object[]? arguments)
+        {
+            try
+            {
+                var formatted = arguments is { Length: > 0 } ? string.Format(message, arguments) : message;
+                var line = $"{DateTime.Now:HH:mm:ss.fff} {formatted}\n";
+                lock (Sync)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(LogPath)!);
+                    File.AppendAllText(LogPath, line);
+                }
+            }
+            catch { /* swallow */ }
         }
     }
 
