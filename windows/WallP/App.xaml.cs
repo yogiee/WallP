@@ -1,7 +1,10 @@
+using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui.Abstractions;
+using Wpf.Ui.Appearance;
 using WallP.Helpers;
 using WallP.Models;
 using WallP.Services;
@@ -18,9 +21,38 @@ public partial class App : Application
         ((App)Current)._host?.Services
             ?? throw new InvalidOperationException("Host not initialized.");
 
+    private static readonly string CrashLogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "WallP",
+        "crash.log");
+
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // Catch everything so silent crashes leave a trace on disk and show a dialog
+        // before the process dies. Without these the published .exe just vanishes.
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex) LogCrash(ex, "AppDomain");
+        };
+        DispatcherUnhandledException += (_, args) =>
+        {
+            LogCrash(args.Exception, "Dispatcher");
+            ShowCrashDialog(args.Exception);
+            args.Handled = true; // keep the app alive after a UI-thread error
+        };
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            LogCrash(args.Exception, "Task");
+            args.SetObserved();
+        };
+
         base.OnStartup(e);
+
+        // Setting <ui:ThemesDictionary Theme="Dark"/> in XAML only seeds the resource
+        // dictionary; it doesn't push the theme through Frame-hosted content like
+        // NavigationView's pages. The manager API does, and also tracks the system
+        // accent color for the title bar.
+        ApplicationThemeManager.Apply(ApplicationTheme.Dark);
 
         try
         {
@@ -130,6 +162,30 @@ public partial class App : Application
             _host.Dispose();
         }
         base.OnExit(e);
+    }
+
+    private static void LogCrash(Exception ex, string source)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(CrashLogPath)!);
+            var line = $"\n=== {DateTime.Now:yyyy-MM-dd HH:mm:ss} [{source}] ===\n{ex}\n";
+            File.AppendAllText(CrashLogPath, line);
+        }
+        catch { /* swallow — best-effort logging */ }
+    }
+
+    private static void ShowCrashDialog(Exception ex)
+    {
+        try
+        {
+            MessageBox.Show(
+                $"WallP encountered an error and may not work correctly:\n\n{ex.Message}\n\nFull stack trace logged to:\n{CrashLogPath}",
+                "WallP — error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+        catch { /* if even MessageBox fails, give up */ }
     }
 
     private static void ConfigureServices(IServiceCollection services)

@@ -69,7 +69,17 @@ public partial class TrayPopover : FluentWindow
         }, System.Windows.Threading.DispatcherPriority.Background);
     }
 
-    private void Window_Deactivated(object sender, EventArgs e) => Close();
+    private bool _closing;
+
+    private void Window_Deactivated(object sender, EventArgs e)
+    {
+        // Guard against re-entry: Settings_Click already calls Close(), and the
+        // resulting focus shift fires Deactivated which would call Close() again
+        // mid-close — that's an InvalidOperationException.
+        if (_closing) return;
+        _closing = true;
+        Close();
+    }
 
     private void OnRotatorChanged(object? sender, PropertyChangedEventArgs e) =>
         Dispatcher.BeginInvoke(Refresh);
@@ -206,7 +216,9 @@ public partial class TrayPopover : FluentWindow
             window.Show();
             window.Activate();
         }
-        Close();
+        // Don't Close() explicitly — the focus shift to the Settings window will
+        // fire our Deactivated handler, which closes us once. Calling Close() here
+        // races with that handler and is the same root cause as the prior NRE.
     }
 
     private void Quit_Click(object sender, RoutedEventArgs e)

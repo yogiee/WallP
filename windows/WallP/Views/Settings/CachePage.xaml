@@ -8,6 +8,7 @@
 
             <ui:TextBlock Text="Cache"
                           FontTypography="TitleLarge"
+                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                           Margin="0,0,0,16" />
 
             <!-- Image optimization -->

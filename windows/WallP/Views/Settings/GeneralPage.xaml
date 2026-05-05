@@ -8,6 +8,7 @@
 
             <ui:TextBlock Text="General"
                           FontTypography="TitleLarge"
+                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                           Margin="0,0,0,16" />
 
             <!-- Wallhaven Account -->
