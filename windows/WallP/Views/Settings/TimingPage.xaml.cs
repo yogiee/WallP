@@ -7,7 +7,7 @@ using WallP.Services;
 
 namespace WallP.Views.Settings;
 
-public partial class TimingPage : UserControl
+public partial class TimingPage : Page
 {
     private readonly AppSettings _settings;
     private readonly SyncScheduler _sync;

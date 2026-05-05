@@ -1,7 +1,7 @@
-<UserControl x:Class="WallP.Views.Settings.CollectionsPage"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+<Page x:Class="WallP.Views.Settings.CollectionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
         <StackPanel MaxWidth="680" HorizontalAlignment="Stretch">
@@ -147,4 +147,4 @@
 
         </StackPanel>
     </ScrollViewer>
-</UserControl>
+</Page>

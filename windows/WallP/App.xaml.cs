@@ -1,6 +1,8 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wpf.Ui.Abstractions;
+using WallP.Helpers;
 using WallP.Models;
 using WallP.Services;
 using WallP.Views;
@@ -147,6 +149,7 @@ public partial class App : Application
         services.AddSingleton<NotificationService>();
 
         services.AddSingleton<TrayIconHost>();
+        services.AddSingleton<INavigationViewPageProvider, NavigationViewPageProvider>();
         services.AddTransient<SettingsWindow>();
         services.AddTransient<TrayPopover>();
         services.AddTransient<GeneralPage>();

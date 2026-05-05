@@ -8,7 +8,7 @@ using WallP.Services;
 
 namespace WallP.Views.Settings;
 
-public partial class AboutPage : UserControl
+public partial class AboutPage : Page
 {
     private const string GitHubUrl = "https://github.com/yogiee/WallP";
 

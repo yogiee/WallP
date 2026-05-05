@@ -6,7 +6,7 @@ using WallP.Services;
 
 namespace WallP.Views.Settings;
 
-public partial class CachePage : UserControl
+public partial class CachePage : Page
 {
     private readonly AppSettings _settings;
     private readonly ImageCache _cache;

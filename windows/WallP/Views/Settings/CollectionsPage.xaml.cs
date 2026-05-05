@@ -6,7 +6,7 @@ using WallP.Services;
 
 namespace WallP.Views.Settings;
 
-public partial class CollectionsPage : UserControl
+public partial class CollectionsPage : Page
 {
     private readonly AppSettings _settings;
     private readonly WallhavenApiService _api;
