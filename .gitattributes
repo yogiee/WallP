@@ -1,0 +1,6 @@
+# Sparkle / NetSparkle appcast files must keep stable byte content because
+# the .signature is a cryptographic hash of those bytes. Force LF so the
+# working copy on Windows matches what raw.githubusercontent.com serves.
+appcast-windows.xml text eol=lf
+appcast-windows.xml.signature text eol=lf
+appcast.xml text eol=lf
