@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Windows.Networking.Connectivity;
 using WallP.Models;
 
 namespace WallP.Services;
@@ -98,6 +99,11 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
             LastSyncError = "No collections configured. Add one in Settings.";
             return;
         }
+        if (_settings.RespectMeteredNetwork && IsMeteredConnection())
+        {
+            LastSyncError = "Skipped: connection is metered.";
+            return;
+        }
 
         IsSyncing = true;
         LastSyncError = null;
@@ -148,6 +154,11 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
         if (collection is null)
         {
             LastSyncError = "Collection not found.";
+            return;
+        }
+        if (_settings.RespectMeteredNetwork && IsMeteredConnection())
+        {
+            LastSyncError = "Skipped: connection is metered.";
             return;
         }
 
@@ -263,6 +274,28 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
     }
 
     public void Dispose() => Stop();
+
+    /// <summary>
+    /// Checks the active internet connection profile via WinRT and returns true when
+    /// it carries a non-Unrestricted cost (i.e., the user has flagged the network as
+    /// metered or it's a known cellular / capped link). Returns false on any error so
+    /// a transient connectivity hiccup never blocks sync indefinitely.
+    /// </summary>
+    private static bool IsMeteredConnection()
+    {
+        try
+        {
+            var profile = NetworkInformation.GetInternetConnectionProfile();
+            if (profile is null) return false;
+            var cost = profile.GetConnectionCost();
+            return cost.NetworkCostType is NetworkCostType.Fixed or NetworkCostType.Variable;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[WallP][Sync] Metered check failed: {ex.Message}");
+            return false;
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
     private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
