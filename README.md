@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  Available for <strong>macOS</strong> (released) — <strong>Windows</strong> port in progress.
+  Available for <strong>macOS</strong> and <strong>Windows</strong>. See the <a href="../../releases">Releases</a> page for downloads.
 </p>
 
 ---
@@ -119,7 +119,12 @@ Build and run with **Cmd+R**, or use the build script:
 
 ### Windows
 
-In progress. The Windows port lives in `windows/` and will be a WPF + .NET 8 app.
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). See [`windows/README.md`](windows/README.md) for full Windows-side documentation.
+
+```powershell
+.\windows\scripts\build-app.ps1         # release: produces windows\build\WallP\WallP.exe + WallP-X.Y.Z.zip
+.\windows\scripts\build-app.ps1 Debug   # debug: app only, faster
+```
 
 ## License
 
