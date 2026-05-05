@@ -35,12 +35,12 @@ public partial class App : Application
             var sync = Services.GetRequiredService<SyncScheduler>();
             var rotator = Services.GetRequiredService<WallpaperRotator>();
 
-            // When sync finishes, kick the rotator if it's idle and we have new images.
-            // Marshals to the UI thread because rotator's INotifyPropertyChanged is bound
-            // to UI in the Settings window.
-            sync.SyncCompleted += (_, args) =>
+            // As soon as sync caches its first image, start the rotator and apply it.
+            // Without this, a fresh setup would wait the entire sync before showing
+            // any wallpaper. SyncScheduler.ImageCached fires from the sync's
+            // thread-pool task, so we marshal to the dispatcher.
+            sync.ImageCached += (_, _) =>
             {
-                if (args.NewImageCount <= 0) return;
                 Dispatcher.BeginInvoke(() =>
                 {
                     if (!rotator.IsRunning && !settings.IsPaused)
@@ -66,6 +66,20 @@ public partial class App : Application
             systemMonitor.SessionUnlocked += (_, _) => Resume();
             systemMonitor.Resumed += (_, _) => Resume();
             systemMonitor.Start();
+
+            // Pause-condition enforcement: fullscreen-app or on-battery (per the user
+            // toggles in General). Stops the rotator while any reason applies, starts it
+            // when all clear (rotator.Start respects settings.IsPaused).
+            var pauseMonitor = Services.GetRequiredService<PauseConditionMonitor>();
+            pauseMonitor.PauseReasonsChanged += (_, reasons) =>
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (reasons != PauseReason.None) rotator.Stop();
+                    else rotator.Start();
+                });
+            };
+            pauseMonitor.Start();
 
             // Start the auto-update background loop unless disabled in settings.
             Services.GetRequiredService<UpdaterService>().StartIfEnabled();

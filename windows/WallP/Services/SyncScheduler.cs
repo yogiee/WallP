@@ -50,6 +50,12 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
 
     public event EventHandler<SyncCompletedEventArgs>? SyncCompleted;
 
+    /// <summary>
+    /// Fires after each successful per-image cache during a sync. Lets the rotator
+    /// react mid-sync (auto-start on first image, refresh its list as more land).
+    /// </summary>
+    public event EventHandler<CachedImage>? ImageCached;
+
     public SyncScheduler(AppSettings settings, WallhavenApiService api, ImageCache cache)
     {
         _settings = settings;
@@ -215,6 +221,7 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
                 _settings.CachedImages.Add(cached);
                 collection.CachedImageIds.Add(cached.Id);
                 added++;
+                ImageCached?.Invoke(this, cached);
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)

@@ -93,36 +93,53 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
 
     public void RefreshImageList()
     {
-        lock (_lock)
+        lock (_lock) { RefreshImageListLocked(); }
+    }
+
+    /// <summary>
+    /// Refreshes the in-memory image list from settings. Caller must already hold
+    /// <see cref="_lock"/> — System.Threading.Lock is non-reentrant, so calling the
+    /// public RefreshImageList from another locked region would deadlock.
+    /// </summary>
+    private void RefreshImageListLocked()
+    {
+        var collection = _settings.ActiveCollection;
+        if (collection is null)
         {
-            var collection = _settings.ActiveCollection;
-            if (collection is null)
-            {
-                _orderedImages = [];
-                _shuffledIndices = [];
-                return;
-            }
+            _orderedImages = [];
+            _shuffledIndices = [];
+            return;
+        }
 
-            var images = _settings.CachedImages
-                .Where(i => i.CollectionId == collection.Id)
-                .ToList();
+        var images = _settings.CachedImages
+            .Where(i => i.CollectionId == collection.Id)
+            .ToList();
 
-            switch (_settings.DisplayOrder)
-            {
-                case DisplayOrder.Name:
-                    images.Sort((a, b) =>
-                        string.Compare(a.LocalFilename, b.LocalFilename, StringComparison.OrdinalIgnoreCase));
-                    break;
-                case DisplayOrder.DateCreated:
-                    images.Sort((a, b) => a.DateAdded.CompareTo(b.DateAdded));
-                    break;
-                case DisplayOrder.Random:
-                    // Order doesn't matter; _shuffledIndices drives randomization.
-                    break;
-            }
+        switch (_settings.DisplayOrder)
+        {
+            case DisplayOrder.Name:
+                images.Sort((a, b) =>
+                    string.Compare(a.LocalFilename, b.LocalFilename, StringComparison.OrdinalIgnoreCase));
+                break;
+            case DisplayOrder.DateCreated:
+                images.Sort((a, b) => a.DateAdded.CompareTo(b.DateAdded));
+                break;
+            case DisplayOrder.Random:
+                // Order doesn't matter; _shuffledIndices drives randomization.
+                break;
+        }
 
-            _orderedImages = images;
+        // Preserve existing shuffled indices when new images land mid-sync, so we
+        // don't re-shuffle on every tick. Just append fresh indices for the new entries.
+        var previousCount = _orderedImages.Count;
+        _orderedImages = images;
+        if (_shuffledIndices.Count == 0 || images.Count < previousCount)
+        {
             ReshuffleIndices();
+        }
+        else if (images.Count > previousCount)
+        {
+            for (var i = previousCount; i < images.Count; i++) _shuffledIndices.Add(i);
         }
     }
 
@@ -152,6 +169,11 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
         List<(MonitorInfo Monitor, CachedImage Image)> assignments;
         lock (_lock)
         {
+            // Always pull the latest cached-image set — sync may have added images
+            // since the last RefreshImageList call, and we want shuffle/auto-rotate
+            // to reach those without waiting for SyncCompleted.
+            RefreshImageListLocked();
+
             if (_orderedImages.Count == 0) return;
 
             if (monitors.Count > 1)
