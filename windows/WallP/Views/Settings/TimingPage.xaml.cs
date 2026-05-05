@@ -66,6 +66,8 @@ public partial class TimingPage : UserControl
         {
             _settings.DisplayOrder = value;
             _rotator.RefreshImageList();
+            // Apply the next image right away so the new ordering takes visible effect.
+            _ = _rotator.NextWallpaperAsync();
         }
     }
 

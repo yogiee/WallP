@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using WallP.Models;
 
 namespace WallP.Services;
@@ -18,6 +20,10 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
     private List<CachedImage> _orderedImages = [];
     private List<int> _shuffledIndices = [];
     private int _currentIndex = -1;
+
+    // What's currently shown on each monitor — populated by Next/Previous and reused
+    // by ReapplyCurrentAsync so we can re-blur without changing the image.
+    private List<(string MonitorId, CachedImage Image)> _monitorAssignments = [];
 
     private bool _isRunning;
     public bool IsRunning
@@ -195,24 +201,30 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
             CurrentImageId = _orderedImages[_currentIndex].Id;
         }
 
-        foreach (var (monitor, image) in assignments)
+        var newAssignments = new List<(string, CachedImage)>(assignments.Count);
+        for (var i = 0; i < assignments.Count; i++)
         {
+            var (monitor, image) = assignments[i];
             ct.ThrowIfCancellationRequested();
             try
             {
-                var path = _cache.PathFor(image);
-                if (!File.Exists(path))
+                var sourcePath = _cache.PathFor(image);
+                if (!File.Exists(sourcePath))
                 {
-                    Debug.WriteLine($"[WallP][Rotator] Missing on disk, skipping: {path}");
+                    Debug.WriteLine($"[WallP][Rotator] Missing on disk, skipping: {sourcePath}");
                     continue;
                 }
-                await _wallpaper.SetWallpaperAsync(monitor.Id, path, ct);
+                var displayPath = await PrepareForDisplayAsync(sourcePath, i, ct);
+                await _wallpaper.SetWallpaperAsync(monitor.Id, displayPath, ct);
+                newAssignments.Add((monitor.Id, image));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[WallP][Rotator] SetWallpaper error on {monitor.Id}: {ex.Message}");
             }
         }
+
+        lock (_lock) { _monitorAssignments = newAssignments; }
     }
 
     public async Task PreviousWallpaperAsync(CancellationToken ct = default)
@@ -226,14 +238,24 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
             CurrentImageId = image.Id;
         }
 
-        var path = _cache.PathFor(image);
-        if (!File.Exists(path))
+        var sourcePath = _cache.PathFor(image);
+        if (!File.Exists(sourcePath))
         {
-            Debug.WriteLine($"[WallP][Rotator] Previous: missing on disk: {path}");
+            Debug.WriteLine($"[WallP][Rotator] Previous: missing on disk: {sourcePath}");
             return;
         }
 
-        try { await _wallpaper.SetWallpaperAllMonitorsAsync(path, ct); }
+        try
+        {
+            var displayPath = await PrepareForDisplayAsync(sourcePath, monitorIndex: 0, ct);
+            await _wallpaper.SetWallpaperAllMonitorsAsync(displayPath, ct);
+
+            // All monitors share the same image now; record one entry per monitor so
+            // ReapplyCurrentAsync can rebuild the blur paths consistently.
+            var monitors = _wallpaper.GetMonitors();
+            var newAssignments = monitors.Select(m => (m.Id, image)).ToList();
+            lock (_lock) { _monitorAssignments = newAssignments; }
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"[WallP][Rotator] Previous error: {ex.Message}");
@@ -241,6 +263,60 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
     }
 
     public Task ShuffleAsync(CancellationToken ct = default) => NextWallpaperAsync(ct);
+
+    /// <summary>
+    /// Re-applies the wallpaper currently on each monitor without changing the image.
+    /// Used when display-time settings (blur) change so the user sees the effect on
+    /// the same image rather than waiting for the next rotation tick.
+    /// </summary>
+    public async Task ReapplyCurrentAsync(CancellationToken ct = default)
+    {
+        List<(string MonitorId, CachedImage Image)> snapshot;
+        lock (_lock)
+        {
+            if (_monitorAssignments.Count == 0) return;
+            snapshot = _monitorAssignments.ToList();
+        }
+
+        for (var i = 0; i < snapshot.Count; i++)
+        {
+            var (monitorId, image) = snapshot[i];
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var sourcePath = _cache.PathFor(image);
+                if (!File.Exists(sourcePath)) continue;
+                var displayPath = await PrepareForDisplayAsync(sourcePath, i, ct);
+                await _wallpaper.SetWallpaperAsync(monitorId, displayPath, ct);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[WallP][Rotator] Reapply error on {monitorId}: {ex.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// If blur is on, blurs <paramref name="sourcePath"/> into a per-monitor temp file
+    /// inside the cache's .blur subdirectory and returns that path. Otherwise returns
+    /// <paramref name="sourcePath"/> unchanged.
+    /// </summary>
+    private async Task<string> PrepareForDisplayAsync(string sourcePath, int monitorIndex, CancellationToken ct)
+    {
+        var radius = _settings.BlurRadius;
+        if (radius <= 0) return sourcePath;
+
+        var blurDir = Path.Combine(ImageCache.CacheDirectory, ".blur");
+        Directory.CreateDirectory(blurDir);
+        var ext = Path.GetExtension(sourcePath);
+        var blurPath = Path.Combine(blurDir, $"m{monitorIndex}{ext}");
+
+        using var img = await Image.LoadAsync(sourcePath, ct);
+        img.Mutate(x => x.GaussianBlur(radius));
+        await img.SaveAsync(blurPath, ct);
+
+        return blurPath;
+    }
 
     private void ScheduleTimer()
     {

@@ -90,10 +90,10 @@ public sealed class ImageOptimizer
             }
         }
 
-        if (_settings.BlurRadius > 0)
-        {
-            image.Mutate(x => x.GaussianBlur(_settings.BlurRadius));
-        }
+        // Note: blur is intentionally NOT applied here. It's a display-time pass owned
+        // by WallpaperRotator so that the cache stays unblurred, the same cached file
+        // can be reused across blur-radius changes, and adjusting the slider applies
+        // immediately to the active wallpaper.
 
         // Encoder selection: WebP at q=85 lands very close to HEIC's compression ratio
         // while remaining royalty-free; JPEG at q=90 is the universal fallback.

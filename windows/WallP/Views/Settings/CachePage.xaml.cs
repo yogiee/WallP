@@ -72,12 +72,26 @@ public partial class CachePage : UserControl
         }
     }
 
+    private CancellationTokenSource? _blurDebounceCts;
+
     private void BlurSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         var value = (int)Math.Round(e.NewValue);
         UpdateBlurLabel();
         if (_initializing) return;
         _settings.BlurRadius = value;
+
+        // Debounce: every drag tick fires ValueChanged; we only want to re-apply once
+        // the user settles on a value (~300ms idle).
+        _blurDebounceCts?.Cancel();
+        _blurDebounceCts = new CancellationTokenSource();
+        var token = _blurDebounceCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try { await Task.Delay(300, token); }
+            catch (TaskCanceledException) { return; }
+            await Dispatcher.InvokeAsync(() => _rotator.ReapplyCurrentAsync());
+        }, token);
     }
 
     private void UpdateBlurLabel()
