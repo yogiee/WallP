@@ -51,6 +51,22 @@ public partial class App : Application
                 });
             };
 
+            // Sync-complete toast — only when the user has it on and at least one
+            // new image was synced. Errors get a separate toast so they're not silent.
+            var notifications = Services.GetRequiredService<NotificationService>();
+            sync.SyncCompleted += (_, args) =>
+            {
+                if (!settings.ShowSyncCompleteToast) return;
+                if (args.Error is { Length: > 0 } err)
+                {
+                    notifications.ShowSyncFailed(err);
+                }
+                else
+                {
+                    notifications.ShowSyncComplete(args.NewImageCount);
+                }
+            };
+
             sync.Start();
 
             // System-driven pauses: stop the rotator when Windows locks the session or
@@ -128,6 +144,7 @@ public partial class App : Application
         services.AddSingleton<PauseConditionMonitor>();
         services.AddSingleton<UpdaterService>();
         services.AddSingleton<StartupRegistrationService>();
+        services.AddSingleton<NotificationService>();
 
         services.AddSingleton<TrayIconHost>();
         services.AddTransient<SettingsWindow>();
