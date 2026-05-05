@@ -5,6 +5,17 @@
         <description>Most recent updates to WallP for Windows</description>
         <language>en</language>
         <item>
+            <title>Version 0.1.1</title>
+            <pubDate>Tue, 05 May 2026 07:30:00 +0000</pubDate>
+            <description>Bug fixes: Settings window crash on open from popover, dark-mode title visibility, mouse wheel scrolling in Settings pages, plus crash diagnostics.</description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/windows-v0.1.1/WallP-0.1.1.zip"
+                sparkle:version="0.1.1"
+                sparkle:edSignature="TkSCDV/KgOJC7Q8XTsm4UZ9UGKW3KkKgwzT28S5I0oeg0uFTwM6d8x0ey6VJs5lHmBDRE2dg3C2PernsMaALCg=="
+                length="11127851"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Version 0.1.0</title>
             <pubDate>Tue, 05 May 2026 04:00:00 +0000</pubDate>
             <enclosure
