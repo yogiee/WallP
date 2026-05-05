@@ -5,6 +5,17 @@
         <description>Most recent updates to WallP for Windows</description>
         <language>en</language>
         <item>
+            <title>Version 0.1.3</title>
+            <pubDate>Tue, 05 May 2026 09:00:00 +0000</pubDate>
+            <description>Update dialog now uses a dark theme matching the rest of the app — dark window background, themed release-notes panel.</description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/windows-v0.1.3/WallP-0.1.3.zip"
+                sparkle:version="0.1.3"
+                sparkle:signature="rVMoDBRqS7W5ihEFm+jaVDn7rMFu/Gqx7tnGgSDyGS3P5SUoHRdpKli+PofEL9/1SBmz/S50/kMkqGch41GqDw=="
+                length="11128914"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Version 0.1.2</title>
             <pubDate>Tue, 05 May 2026 08:30:00 +0000</pubDate>
             <description>Auto-update polish: clean version string in the update dialog (no more git SHA leak), persistent NetSparkle log at %LOCALAPPDATA%\WallP\netsparkle.log for diagnostics, signed appcast workflow, LF-normalized appcast files.</description>
