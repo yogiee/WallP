@@ -1,6 +1,7 @@
 using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 using WallP.Models;
 
@@ -31,13 +32,14 @@ public sealed class ImageOptimizer
         Directory.CreateDirectory(destinationDirectory);
 
         // HEIC encoding requires WIC + the Microsoft HEIF Image Extension. Not wired up
-        // yet — silently fall back to JPEG when HEIC is selected.
+        // yet — silently fall back to JPEG when HEIC is selected (kept for back-compat
+        // with older settings.json that may still hold an Heic value).
         var format = _settings.CacheImageFormat;
         if (format == ImageFormat.Heic) format = ImageFormat.Jpeg;
 
         var extension = format switch
         {
-            ImageFormat.Jpeg => ".jpg",
+            ImageFormat.Webp => ".webp",
             _ => ".jpg",
         };
         var destinationPath = Path.Combine(destinationDirectory, baseFileName + extension);
@@ -93,8 +95,18 @@ public sealed class ImageOptimizer
             image.Mutate(x => x.GaussianBlur(_settings.BlurRadius));
         }
 
-        var encoder = new JpegEncoder { Quality = 90 };
-        await image.SaveAsync(destinationPath, encoder, ct);
+        // Encoder selection: WebP at q=85 lands very close to HEIC's compression ratio
+        // while remaining royalty-free; JPEG at q=90 is the universal fallback.
+        if (format == ImageFormat.Webp)
+        {
+            var webpEncoder = new WebpEncoder { Quality = 85, FileFormat = WebpFileFormatType.Lossy };
+            await image.SaveAsync(destinationPath, webpEncoder, ct);
+        }
+        else
+        {
+            var jpegEncoder = new JpegEncoder { Quality = 90 };
+            await image.SaveAsync(destinationPath, jpegEncoder, ct);
+        }
 
         return destinationPath;
     }

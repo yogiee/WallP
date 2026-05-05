@@ -23,6 +23,12 @@ public partial class CachePage : UserControl
         DataContext = settings;
 
         FormatPicker.ItemsSource = BuildFormatItems();
+        // Older settings may have Heic stored — auto-migrate to JPEG since HEIC isn't
+        // wired up yet and isn't in the picker.
+        if (_settings.CacheImageFormat == ImageFormat.Heic)
+        {
+            _settings.CacheImageFormat = ImageFormat.Jpeg;
+        }
         FormatPicker.SelectedValue = _settings.CacheImageFormat;
         UpdateFormatHint();
 
@@ -37,24 +43,15 @@ public partial class CachePage : UserControl
         _initializing = false;
     }
 
-    private IList<EnumPickerItem<ImageFormat>> BuildFormatItems()
+    private IList<EnumPickerItem<ImageFormat>> BuildFormatItems() => new List<EnumPickerItem<ImageFormat>>
     {
-        var items = new List<EnumPickerItem<ImageFormat>>
-        {
-            new(ImageFormat.Jpeg, "JPEG (universal, recommended)"),
-        };
-        if (ImageOptimizer.IsHeicAvailable())
-        {
-            items.Add(new EnumPickerItem<ImageFormat>(ImageFormat.Heic, "HEIC (smaller files)"));
-        }
-        return items;
-    }
+        new(ImageFormat.Jpeg, "JPEG (universal)"),
+        new(ImageFormat.Webp, "WebP (~25% smaller, recommended)"),
+    };
 
     private void UpdateFormatHint()
     {
-        FormatHint.Text = ImageOptimizer.IsHeicAvailable()
-            ? "Used for newly-cached images. Existing files keep their format."
-            : "HEIC requires the Microsoft HEIF Image Extension and isn't yet wired up — only JPEG is available.";
+        FormatHint.Text = "Used for newly-cached images. Existing files keep their format until re-synced.";
     }
 
     private void FormatPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)

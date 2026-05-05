@@ -9,17 +9,14 @@
             <!-- Identity -->
             <StackPanel HorizontalAlignment="Center"
                         Margin="0,16,0,32">
-                <Button x:Name="IconButton"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Padding="0"
-                        Cursor="Hand"
-                        Click="OpenGitHub_Click">
-                    <Image Source="pack://application:,,,/Assets/WallP.ico"
-                           Width="96"
-                           Height="96"
-                           Stretch="Uniform" />
-                </Button>
+                <Image x:Name="IconImage"
+                       Source="pack://application:,,,/Assets/AppIcon-512.png"
+                       Width="120"
+                       Height="120"
+                       Cursor="Hand"
+                       MouseLeftButtonUp="OpenGitHub_Click"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       HorizontalAlignment="Center" />
 
                 <ui:TextBlock Text="WallP"
                               FontTypography="Title"

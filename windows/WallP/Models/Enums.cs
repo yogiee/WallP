@@ -38,8 +38,12 @@ public enum CacheLimit
 
 public enum ImageFormat
 {
-    [Description("JPEG (universal, recommended)")] Jpeg,
-    [Description("HEIC (smaller, requires HEIF Image Extension)")] Heic,
+    [Description("JPEG (universal)")] Jpeg,
+    [Description("WebP (~25% smaller than JPEG, recommended)")] Webp,
+    // Heic is retained for backward-compat with older settings.json files; the
+    // optimizer silently falls back to JPEG when this is selected, since HEIC
+    // encoding requires the Microsoft HEIF Image Extension and isn't yet wired up.
+    [Description("HEIC (not yet supported)")] Heic,
 }
 
 public enum UpdateMode
