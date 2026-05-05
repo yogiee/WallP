@@ -53,6 +53,20 @@ public partial class App : Application
 
             sync.Start();
 
+            // System-driven pauses: stop the rotator when Windows locks the session or
+            // suspends, restart when it returns. Doesn't touch settings.IsPaused — that's
+            // the user-facing toggle, this is system state. SystemEvents callbacks fire
+            // on a private thread, so we marshal to the UI dispatcher before touching the
+            // rotator's INotifyPropertyChanged-driven state.
+            var systemMonitor = Services.GetRequiredService<SystemStateMonitor>();
+            void Suspend() => Dispatcher.BeginInvoke(rotator.Stop);
+            void Resume() => Dispatcher.BeginInvoke(rotator.Start);
+            systemMonitor.SessionLocked += (_, _) => Suspend();
+            systemMonitor.Suspending += (_, _) => Suspend();
+            systemMonitor.SessionUnlocked += (_, _) => Resume();
+            systemMonitor.Resumed += (_, _) => Resume();
+            systemMonitor.Start();
+
             // Start the auto-update background loop unless disabled in settings.
             Services.GetRequiredService<UpdaterService>().StartIfEnabled();
 
