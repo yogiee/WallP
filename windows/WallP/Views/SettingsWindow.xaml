@@ -31,14 +31,13 @@
                                PaneDisplayMode="Left"
                                IsBackButtonVisible="Collapsed"
                                IsPaneToggleVisible="False"
-                               OpenPaneLength="220"
-                               SelectionChanged="Nav_SelectionChanged">
+                               OpenPaneLength="220">
                 <ui:NavigationView.MenuItems>
-                    <ui:NavigationViewItem x:Name="GeneralItem" Content="General" Icon="{ui:SymbolIcon Settings24}" />
-                    <ui:NavigationViewItem x:Name="CollectionsItem" Content="Collections" Icon="{ui:SymbolIcon Folder24}" />
-                    <ui:NavigationViewItem x:Name="TimingItem" Content="Timing" Icon="{ui:SymbolIcon Clock24}" />
-                    <ui:NavigationViewItem x:Name="CacheItem" Content="Cache" Icon="{ui:SymbolIcon Storage24}" />
-                    <ui:NavigationViewItem x:Name="AboutItem" Content="About" Icon="{ui:SymbolIcon Info24}" />
+                    <ui:NavigationViewItem x:Name="GeneralItem" Content="General" Icon="{ui:SymbolIcon Settings24}" Click="NavItem_Click" />
+                    <ui:NavigationViewItem x:Name="CollectionsItem" Content="Collections" Icon="{ui:SymbolIcon Folder24}" Click="NavItem_Click" />
+                    <ui:NavigationViewItem x:Name="TimingItem" Content="Timing" Icon="{ui:SymbolIcon Clock24}" Click="NavItem_Click" />
+                    <ui:NavigationViewItem x:Name="CacheItem" Content="Cache" Icon="{ui:SymbolIcon Storage24}" Click="NavItem_Click" />
+                    <ui:NavigationViewItem x:Name="AboutItem" Content="About" Icon="{ui:SymbolIcon Info24}" Click="NavItem_Click" />
                 </ui:NavigationView.MenuItems>
             </ui:NavigationView>
 

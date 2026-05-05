@@ -32,9 +32,11 @@ public partial class SettingsWindow : FluentWindow
         ContentArea.Content = _pageFactories[GeneralItem]();
     }
 
-    private void Nav_SelectionChanged(NavigationView sender, RoutedEventArgs e)
+    private void NavItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender.SelectedItem is NavigationViewItem item && _pageFactories.TryGetValue(item, out var factory))
+        // NavigationView.SelectionChanged in WPF-UI 4.3 only fires when items have a
+        // TargetPageType — without that we have to wire each item's Click event ourselves.
+        if (sender is NavigationViewItem item && _pageFactories.TryGetValue(item, out var factory))
         {
             ContentArea.Content = factory();
         }
