@@ -117,6 +117,7 @@ public partial class App : Application
 
         services.AddSingleton<TrayIconHost>();
         services.AddTransient<SettingsWindow>();
+        services.AddTransient<TrayPopover>();
         services.AddTransient<GeneralPage>();
         services.AddTransient<CollectionsPage>();
         services.AddTransient<TimingPage>();

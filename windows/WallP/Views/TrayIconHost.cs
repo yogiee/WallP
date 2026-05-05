@@ -55,7 +55,7 @@ public sealed class TrayIconHost : IDisposable
             ContextMenu = BuildMenu(),
         };
 
-        _icon.LeftClickCommand = new RelayCommand(_ => OpenSettings());
+        _icon.LeftClickCommand = new RelayCommand(_ => OpenPopover());
 
         // H.NotifyIcon 2.x lazily registers with the shell. Force the registration so
         // the icon shows up immediately rather than (sometimes) waiting for a redraw.
@@ -196,6 +196,18 @@ public sealed class TrayIconHost : IDisposable
         var window = App.Services.GetRequiredService<SettingsWindow>();
         window.Show();
         window.Activate();
+    }
+
+    private static void OpenPopover()
+    {
+        // Dismiss any existing popover before showing a new one (rapid double-clicks).
+        foreach (var existing in Application.Current.Windows.OfType<TrayPopover>().ToList())
+        {
+            existing.Close();
+        }
+
+        var popover = App.Services.GetRequiredService<TrayPopover>();
+        popover.ShowNearTray();
     }
 }
 
