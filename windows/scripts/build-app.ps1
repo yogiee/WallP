@@ -80,7 +80,7 @@ if (Test-Path $NetSparkleTool) {
         Write-Host ""
         Write-Host "  *** Update appcast-windows.xml with:"
         Write-Host "      sparkle:version=`"$Version`""
-        Write-Host "      sparkle:edSignature=`"$Signature`""
+        Write-Host "      sparkle:signature=`"$Signature`""
         Write-Host "      length=`"$ZipSize`""
     } else {
         Write-Host "  Note: signing produced no signature line. Output:"
