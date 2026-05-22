@@ -146,6 +146,8 @@ final class AppSettings: ObservableObject {
     private func saveCollections() {
         if let data = try? JSONEncoder().encode(collections) {
             defaults.set(data, forKey: collectionsKey)
+            // Mirror to shared app group so the App Intents extension can read it
+            UserDefaults(suiteName: "group.com.wallp.app")?.set(data, forKey: collectionsKey)
         }
     }
 

@@ -1,5 +1,4 @@
 import SwiftUI
-import AppIntents
 
 @main
 struct WallPApp: App {
@@ -62,10 +61,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        // Focus filter check — isolated so it can't block the main startup
+        // Focus filter override — reads collection written by the App Intents Extension
+        // when a Focus mode activates.  Only overrides if the key exists (set by extension).
         Task { @MainActor in
-            await checkFocusFilter()
+            AppDelegate.applyFocusFilter()
         }
+
+        // Observe live Focus changes posted by the extension while the app is running.
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(handleFocusFilterChanged),
+            name: NSNotification.Name("com.wallp.app.focusFilterChanged"),
+            object: nil
+        )
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -77,24 +85,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Focus Filter (isolated)
+    // MARK: - Focus Filter
+
+    @objc private func handleFocusFilterChanged() {
+        Task { @MainActor in AppDelegate.applyFocusFilter() }
+    }
 
     @MainActor
-    private func checkFocusFilter() async {
-        do {
-            let filter = try await WallPFocusFilter.current
-            if let collectionIDString = filter.collection?.id,
-               let collectionID = UUID(uuidString: collectionIDString) {
-                print("[WallP] Focus filter active, switching to collection: \(collectionIDString)")
-                WallpaperRotator.shared.switchToCollection(collectionID)
-            } else {
-                print("[WallP] Focus filter has no collection assigned — using default")
-            }
-        } catch {
-            // Expected when no Focus filter is configured for this app yet.
-            // This is normal on first launch — the user needs to configure it
-            // in System Settings → Focus → [Mode] → Add Filter → WallP.
-            print("[WallP] No Focus filter configured (this is normal): \(error.localizedDescription)")
+    private static func applyFocusFilter() {
+        // The extension writes a collection ID (or empty string for "default") under this key
+        // when a Focus activates.  If the key is absent no focus filter has ever fired.
+        let suite = UserDefaults(suiteName: "group.com.wallp.app")
+        guard suite?.object(forKey: "wallp_focus_active_collection") != nil else { return }
+
+        if let idStr = suite?.string(forKey: "wallp_focus_active_collection"),
+           !idStr.isEmpty,
+           let id = UUID(uuidString: idStr) {
+            print("[WallP] Focus filter active → switching to collection: \(idStr)")
+            WallpaperRotator.shared.switchToCollection(id)
+        } else {
+            print("[WallP] Focus filter active → reverting to default collection")
+            WallpaperRotator.shared.switchToDefaultCollection()
         }
     }
 }

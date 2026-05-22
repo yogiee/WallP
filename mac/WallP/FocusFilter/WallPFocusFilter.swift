@@ -1,7 +1,7 @@
 import AppIntents
 import Foundation
 
-// MARK: - Wallpaper Collection Entity for Focus Filter
+// MARK: - Wallpaper Collection Entity
 
 struct WallpaperCollectionEntity: AppEntity {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Wallpaper Collection")
@@ -15,19 +15,27 @@ struct WallpaperCollectionEntity: AppEntity {
     }
 }
 
+// Reads collections from the main app's UserDefaults domain — accessible to the extension
+// without requiring AppSettings (which depends on the full app environment).
 struct WallpaperCollectionQuery: EntityQuery {
+    private static let collectionsKey = "wallp_collections"
+    private static let appDomain = "group.com.wallp.app"
+
+    private func allCollections() -> [WallPCollection] {
+        guard let data = UserDefaults(suiteName: Self.appDomain)?.data(forKey: Self.collectionsKey),
+              let decoded = try? JSONDecoder().decode([WallPCollection].self, from: data)
+        else { return [] }
+        return decoded
+    }
+
     func entities(for identifiers: [String]) async throws -> [WallpaperCollectionEntity] {
-        let collections = await MainActor.run { AppSettings.shared.collections }
-        return collections
+        allCollections()
             .filter { identifiers.contains($0.id.uuidString) }
             .map { WallpaperCollectionEntity(id: $0.id.uuidString, name: $0.name) }
     }
 
     func suggestedEntities() async throws -> [WallpaperCollectionEntity] {
-        let collections = await MainActor.run { AppSettings.shared.collections }
-        return collections.map {
-            WallpaperCollectionEntity(id: $0.id.uuidString, name: $0.name)
-        }
+        allCollections().map { WallpaperCollectionEntity(id: $0.id.uuidString, name: $0.name) }
     }
 }
 
@@ -50,16 +58,15 @@ struct WallPFocusFilter: SetFocusFilterIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        if let collectionIDString = collection?.id,
-           let collectionID = UUID(uuidString: collectionIDString) {
-            await MainActor.run {
-                WallpaperRotator.shared.switchToCollection(collectionID)
-            }
-        } else {
-            await MainActor.run {
-                WallpaperRotator.shared.switchToDefaultCollection()
-            }
-        }
+        let suite = UserDefaults(suiteName: "group.com.wallp.app")
+        suite?.set(collection?.id ?? "", forKey: "wallp_focus_active_collection")
+        suite?.synchronize()
+
+        // Wake up the running main app process immediately if possible.
+        DistributedNotificationCenter.default().postNotificationName(
+            NSNotification.Name("com.wallp.app.focusFilterChanged"),
+            object: nil
+        )
         return .result()
     }
 }

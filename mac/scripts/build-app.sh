@@ -37,6 +37,7 @@ xcodebuild \
     -scheme "$APP_NAME" \
     -configuration "$XCODE_CONFIG" \
     -derivedDataPath "$DERIVED_DIR" \
+    -allowProvisioningUpdates \
     clean build \
     2>&1 | grep -E "^(error:|warning:|Build succeeded|BUILD SUCCEEDED|BUILD FAILED|/.*error:|/.*warning:)" || true
 

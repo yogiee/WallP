@@ -13,6 +13,27 @@
              the edSignature and length values to paste in here. -->
 
         <item>
+            <title>WallP 1.3.2</title>
+            <pubDate>Fri, 23 May 2026 00:00:00 +0000</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>1.3.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h3>WallP 1.3.2</h3>
+                <ul>
+                    <li>Fixed Focus Filter — "Could not load" error on macOS 26.5 is resolved</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/v1.3.2/WallP-1.3.2.dmg"
+                sparkle:version="6"
+                sparkle:shortVersionString="1.3.2"
+                sparkle:edSignature="DWqykOadOh6M4tgTGANyMR7/PRuL2tcXAh1vOjK5usIU+OUatvjBGpoD2zar8dpDmcoU97eD6aHBwGRvdDvoCw=="
+                length="1793487"
+                type="application/x-apple-diskimage"/>
+        </item>
+
+        <item>
             <title>WallP 1.3.1</title>
             <pubDate>Thu, 03 Apr 2026 00:00:00 +0000</pubDate>
             <sparkle:version>5</sparkle:version>

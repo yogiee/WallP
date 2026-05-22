@@ -19,11 +19,38 @@
 		A10010 /* WallhavenModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10010 /* WallhavenModels.swift */; };
 		A10011 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10011 /* Collection.swift */; };
 		A10012 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* AppSettings.swift */; };
-		A10013 /* WallPFocusFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10013 /* WallPFocusFilter.swift */; };
 		A10014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10014 /* Assets.xcassets */; };
 		A10015 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = P10002 /* Sparkle */; };
 		A10017 /* UpdaterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017 /* UpdaterService.swift */; };
+		A20001 /* WallPAppIntentsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001 /* WallPAppIntentsExtension.swift */; };
+		A20002 /* WallPFocusFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10013 /* WallPFocusFilter.swift */; };
+		A20003 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10011 /* Collection.swift */; };
+		A20004 /* WallPAppIntentsExtension.appex in CopyFiles */ = {isa = PBXBuildFile; fileRef = B20099 /* WallPAppIntentsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		X20001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10099 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E20001;
+			remoteInfo = WallPAppIntentsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C10004 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				A20004 /* WallPAppIntentsExtension.appex in CopyFiles */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B10001 /* WallPApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPApp.swift; sourceTree = "<group>"; };
@@ -44,6 +71,10 @@
 		B10016 /* WallP.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WallP.entitlements; sourceTree = "<group>"; };
 		B10017 /* UpdaterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterService.swift; sourceTree = "<group>"; };
 		B10099 /* WallP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WallP.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20001 /* WallPAppIntentsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallPAppIntentsExtension.swift; sourceTree = "<group>"; };
+		B20002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B20003 /* WallPAppIntentsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WallPAppIntentsExtension.entitlements; sourceTree = "<group>"; };
+		B20099 /* WallPAppIntentsExtension.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.extensionkit-extension; includeInIndex = 0; path = WallPAppIntentsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +83,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10015 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C20001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +112,7 @@
 				D10005 /* Services */,
 				D10006 /* Models */,
 				D10007 /* FocusFilter */,
+				D20001 /* AppIntentsExtension */,
 				B10014 /* Assets.xcassets */,
 				B10016 /* WallP.entitlements */,
 			);
@@ -134,8 +173,19 @@
 			isa = PBXGroup;
 			children = (
 				B10099 /* WallP.app */,
+				B20099 /* WallPAppIntentsExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D20001 /* WallPAppIntentsExtension */ = {
+			isa = PBXGroup;
+			children = (
+				B20001 /* WallPAppIntentsExtension.swift */,
+				B20002 /* Info.plist */,
+				B20003 /* WallPAppIntentsExtension.entitlements */,
+			);
+			path = AppIntentsExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -148,10 +198,12 @@
 				C10002 /* Sources */,
 				C10001 /* Frameworks */,
 				C10003 /* Resources */,
+				C10004 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				X20002 /* PBXTargetDependency */,
 			);
 			name = WallP;
 			packageProductDependencies = (
@@ -160,6 +212,23 @@
 			productName = WallP;
 			productReference = B10099 /* WallP.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E20001 /* WallPAppIntentsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F20003 /* Build configuration list for PBXNativeTarget "WallPAppIntentsExtension" */;
+			buildPhases = (
+				C20003 /* Sources */,
+				C20001 /* Frameworks */,
+				C20002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WallPAppIntentsExtension;
+			productName = WallPAppIntentsExtension;
+			productReference = B20099 /* WallPAppIntentsExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -172,6 +241,9 @@
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					E10001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					E20001 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -193,6 +265,7 @@
 			projectRoot = "";
 			targets = (
 				E10001 /* WallP */,
+				E20001 /* WallPAppIntentsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -203,6 +276,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10014 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C20002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -225,12 +305,29 @@
 				A10010 /* WallhavenModels.swift in Sources */,
 				A10011 /* Collection.swift in Sources */,
 				A10012 /* AppSettings.swift in Sources */,
-				A10013 /* WallPFocusFilter.swift in Sources */,
 				A10017 /* UpdaterService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C20003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20001 /* WallPAppIntentsExtension.swift in Sources */,
+				A20002 /* WallPFocusFilter.swift in Sources */,
+				A20003 /* Collection.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		X20002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E20001 /* WallPAppIntentsExtension */;
+			targetProxy = X20001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F10010 /* Debug */ = {
@@ -345,8 +442,9 @@
 				CODE_SIGN_ENTITLEMENTS = WallP/WallP.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 84GVURG9F2;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -358,7 +456,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.3.1;
+				MARKETING_VERSION = 1.3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -374,8 +472,9 @@
 				CODE_SIGN_ENTITLEMENTS = WallP/WallP.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 84GVURG9F2;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -387,9 +486,63 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.3.1;
+				MARKETING_VERSION = 1.3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		F20020 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WallP/AppIntentsExtension/WallPAppIntentsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 84GVURG9F2;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WallP/AppIntentsExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.3.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app.AppIntentsExtension;
+				PRODUCT_NAME = WallPAppIntentsExtension;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F20021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WallP/AppIntentsExtension/WallPAppIntentsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 84GVURG9F2;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WallP/AppIntentsExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.3.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallp.app.AppIntentsExtension;
+				PRODUCT_NAME = WallPAppIntentsExtension;
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
@@ -432,6 +585,15 @@
 			buildConfigurations = (
 				F10020 /* Debug */,
 				F10021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F20003 /* Build configuration list for PBXNativeTarget "WallPAppIntentsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F20020 /* Debug */,
+				F20021 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

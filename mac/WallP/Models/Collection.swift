@@ -49,7 +49,11 @@ struct CachedImage: Codable, Identifiable {
     let collectionID: UUID
 
     var localURL: URL {
-        ImageCache.cacheDirectory
+        // Mirrors ImageCache.cacheDirectory — inlined so Collection.swift can compile
+        // in the App Intents extension target without pulling in ImageCache.
+        FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("WallP/cache", isDirectory: true)
             .appendingPathComponent(collectionID.uuidString)
             .appendingPathComponent(localFilename)
     }
