@@ -67,17 +67,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             AppDelegate.applyFocusFilter()
         }
 
-        // Observe live Focus changes posted by the extension while the app is running.
-        DistributedNotificationCenter.default().addObserver(
-            self,
-            selector: #selector(handleFocusFilterChanged),
-            name: NSNotification.Name("com.wallp.app.focusFilterChanged"),
-            object: nil
+        // Observe live Focus changes from the extension via CF Darwin notification center.
+        // DistributedNotificationCenter is unreliable from sandboxed extensions;
+        // CFNotificationCenterGetDarwinNotifyCenter() works across all process boundaries.
+        CFNotificationCenterAddObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            { _, _, _, _, _ in Task { @MainActor in AppDelegate.applyFocusFilter() } },
+            "com.wallp.app.focusFilterChanged" as CFString,
+            nil,
+            .deliverImmediately
         )
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         print("[WallP] App terminating")
+        CFNotificationCenterRemoveObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            CFNotificationName("com.wallp.app.focusFilterChanged" as CFString),
+            nil
+        )
         Task { @MainActor in
             WallpaperRotator.shared.stop()
             SyncScheduler.shared.stop()
@@ -85,23 +95,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Focus Filter
-
-    @objc private func handleFocusFilterChanged() {
-        Task { @MainActor in AppDelegate.applyFocusFilter() }
-    }
-
     @MainActor
     private static func applyFocusFilter() {
-        // The extension writes a collection ID (or empty string for "default") under this key
-        // when a Focus activates.  If the key is absent no focus filter has ever fired.
-        let suite = UserDefaults(suiteName: "group.com.wallp.app")
-        guard suite?.object(forKey: "wallp_focus_active_collection") != nil else { return }
+        // The extension writes a plain file to the shared group container.
+        // UserDefaults(suiteName:) write is blocked by the sandbox in the extension
+        // ("user-preference-write outside container"), but file-write-data is allowed.
+        // File absent = no filter ever fired; empty string = revert to default.
+        guard let containerURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.wallp.app"
+        ) else { return }
 
-        if let idStr = suite?.string(forKey: "wallp_focus_active_collection"),
-           !idStr.isEmpty,
-           let id = UUID(uuidString: idStr) {
-            print("[WallP] Focus filter active → switching to collection: \(idStr)")
+        let fileURL = containerURL.appendingPathComponent("wallp_focus_active_collection")
+        guard let value = try? String(contentsOf: fileURL, encoding: .utf8) else { return }
+
+        if !value.isEmpty, let id = UUID(uuidString: value) {
+            print("[WallP] Focus filter active → switching to collection: \(value)")
             WallpaperRotator.shared.switchToCollection(id)
         } else {
             print("[WallP] Focus filter active → reverting to default collection")

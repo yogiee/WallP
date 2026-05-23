@@ -7,16 +7,24 @@ struct WallpaperCollectionEntity: AppEntity {
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Wallpaper Collection")
     static let defaultQuery = WallpaperCollectionQuery()
 
-    var id: String
-    var name: String
+    let id: UUID
+    let name: String
 
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: LocalizedStringResource(stringLiteral: name))
     }
+
+    // AppEntity identity is the id alone — name changes must not create phantom selections.
+    static func == (lhs: WallpaperCollectionEntity, rhs: WallpaperCollectionEntity) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-// Reads collections from the main app's UserDefaults domain — accessible to the extension
-// without requiring AppSettings (which depends on the full app environment).
+// Reads collections from the shared app group container.
 struct WallpaperCollectionQuery: EntityQuery {
     private static let collectionsKey = "wallp_collections"
     private static let appDomain = "group.com.wallp.app"
@@ -28,14 +36,18 @@ struct WallpaperCollectionQuery: EntityQuery {
         return decoded
     }
 
-    func entities(for identifiers: [String]) async throws -> [WallpaperCollectionEntity] {
+    func entities(for identifiers: [UUID]) async throws -> [WallpaperCollectionEntity] {
         allCollections()
-            .filter { identifiers.contains($0.id.uuidString) }
-            .map { WallpaperCollectionEntity(id: $0.id.uuidString, name: $0.name) }
+            .filter { identifiers.contains($0.id) }
+            .map { WallpaperCollectionEntity(id: $0.id, name: $0.name) }
     }
 
     func suggestedEntities() async throws -> [WallpaperCollectionEntity] {
-        allCollections().map { WallpaperCollectionEntity(id: $0.id.uuidString, name: $0.name) }
+        allCollections().map { WallpaperCollectionEntity(id: $0.id, name: $0.name) }
+    }
+
+    func defaultResult() async -> WallpaperCollectionEntity? {
+        allCollections().first.map { WallpaperCollectionEntity(id: $0.id, name: $0.name) }
     }
 }
 
@@ -47,6 +59,7 @@ struct WallPFocusFilter: SetFocusFilterIntent {
         "Automatically switch wallpaper collection when this Focus activates."
     )
 
+    // SetFocusFilterIntent requires all parameters to be Optional.
     @Parameter(title: "Wallpaper Collection")
     var collection: WallpaperCollectionEntity?
 
@@ -58,14 +71,22 @@ struct WallPFocusFilter: SetFocusFilterIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        let suite = UserDefaults(suiteName: "group.com.wallp.app")
-        suite?.set(collection?.id ?? "", forKey: "wallp_focus_active_collection")
-        suite?.synchronize()
+        // UserDefaults(suiteName:) write is blocked by the sandbox
+        // ("user-preference-write outside container" error).
+        // Writing a plain file via FileManager uses file-write-data access,
+        // which the app-group entitlement does grant.
+        let value = collection?.id.uuidString ?? ""
+        if let containerURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.wallp.app"
+        ) {
+            let fileURL = containerURL.appendingPathComponent("wallp_focus_active_collection")
+            try? value.write(to: fileURL, atomically: true, encoding: .utf8)
+        }
 
-        // Wake up the running main app process immediately if possible.
-        DistributedNotificationCenter.default().postNotificationName(
-            NSNotification.Name("com.wallp.app.focusFilterChanged"),
-            object: nil
+        CFNotificationCenterPostNotification(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            CFNotificationName("com.wallp.app.focusFilterChanged" as CFString),
+            nil, nil, true
         )
         return .result()
     }

@@ -139,6 +139,9 @@ final class AppSettings: ObservableObject {
         self.cachedImages = []
         self.collections = loadCollections()
         self.cachedImages = loadCachedImages()
+        // Mirror to group suite immediately — didSet doesn't fire during init,
+        // so the extension would have stale/empty data until collections change.
+        saveCollections()
     }
 
     // MARK: - Persistence
