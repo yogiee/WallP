@@ -32,6 +32,7 @@ memory-bank/
 
 # Claude Code workspace config (per-machine, not for sharing)
 .claude/
+CLAUDE.md
 
 # Windows / .NET (placeholder — populated when Windows project is scaffolded)
 [Bb]in/
