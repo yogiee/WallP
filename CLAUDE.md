@@ -3,6 +3,9 @@
 This repo contains both the macOS app (`mac/`) and the upcoming Windows app (`windows/`).
 Shared at the repo root: `README.md`, `docs/`, `appcast.xml` (Mac/Sparkle), `appcast-windows.xml` (when added).
 
+## Stack
+swift, swiftui, macos, dotnet
+
 ## Tools to Use
 
 - **Swift LSP** — use LSP tools for Swift code navigation, symbol lookup, and diagnostics when working in `mac/`.
