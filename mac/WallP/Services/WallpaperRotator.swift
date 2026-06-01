@@ -62,6 +62,14 @@ final class WallpaperRotator: ObservableObject {
         settings.defaultCollectionID = collectionID
         refreshImageList()
         currentIndex = -1
+
+        if orderedImages.isEmpty {
+            // No cached images yet — trigger a sync; the progressive callback in
+            // SyncScheduler will set the wallpaper as soon as the first image arrives.
+            Task { await SyncScheduler.shared.syncCollection(collectionID) }
+            return
+        }
+
         nextWallpaper()
         // Reset the rotation timer so the full interval starts from now
         if isRunning {

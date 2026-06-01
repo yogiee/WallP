@@ -22,7 +22,10 @@ actor ImageCache {
 
     // MARK: - Sync Collection from Wallhaven
 
-    func syncCollection(_ collection: WallPCollection) async throws -> [CachedImage] {
+    func syncCollection(
+        _ collection: WallPCollection,
+        onImageCached: (@Sendable (CachedImage) async -> Void)? = nil
+    ) async throws -> [CachedImage] {
         print("[WallP][Cache] Fetching wallpaper list for collection \(collection.wallhavenCollectionID)...")
 
         let wallpapers = try await api.fetchAllCollectionWallpapers(
@@ -64,6 +67,7 @@ actor ImageCache {
                 )
                 newCachedImages.append(cachedImage)
                 print("[WallP][Cache] Cached: \(cachedImage.localFilename) (\(ByteCountFormatter.string(fromByteCount: cachedImage.fileSize, countStyle: .file)))")
+                await onImageCached?(cachedImage)
             } catch {
                 print("[WallP][Cache] Failed to cache \(wallpaper.id): \(error.localizedDescription)")
             }

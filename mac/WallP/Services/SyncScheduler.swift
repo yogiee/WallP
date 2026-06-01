@@ -17,7 +17,7 @@ final class SyncScheduler: ObservableObject {
     func start() {
         scheduleTimer()
 
-        // Do an initial sync if we have collections but no cached images
+        // Auto-sync on launch if collections exist but cache is empty
         if !settings.collections.isEmpty {
             let totalCached = settings.collections.reduce(0) {
                 $0 + settings.imagesForCollection($1.id).count
@@ -54,19 +54,17 @@ final class SyncScheduler: ObservableObject {
         do {
             for i in settings.collections.indices {
                 let collection = settings.collections[i]
+                let collectionID = collection.id
                 syncProgress = "Syncing \"\(collection.name)\"..."
-
                 print("[WallP] Syncing collection: \(collection.name) (Wallhaven #\(collection.wallhavenCollectionID))")
 
-                let newImages = try await imageCache.syncCollection(collection)
+                let newImages = try await imageCache.syncCollection(collection) { image in
+                    await MainActor.run {
+                        self.handleImageDownloaded(image, collectionID: collectionID)
+                    }
+                }
 
                 print("[WallP] Downloaded \(newImages.count) new images for \"\(collection.name)\"")
-
-                // Update cached images in settings
-                settings.cachedImages.append(contentsOf: newImages)
-
-                // Update collection's cached IDs and lastSynced
-                settings.collections[i].cachedImageIDs.append(contentsOf: newImages.map(\.id))
                 settings.collections[i].lastSynced = Date()
             }
 
@@ -76,12 +74,11 @@ final class SyncScheduler: ObservableObject {
             syncProgress = "Sync complete. \(totalImages) images cached."
             print("[WallP] Sync complete. Total cached images: \(totalImages)")
 
-            // Refresh the rotator's image list and start if needed
+            // Final refresh in case active collection gained images without triggering start
             let rotator = WallpaperRotator.shared
             rotator.refreshImageList()
             if !rotator.isRunning && !settings.isPaused && totalImages > 0 {
                 rotator.start()
-                // Set the first wallpaper immediately
                 rotator.nextWallpaper()
             }
         } catch {
@@ -109,21 +106,15 @@ final class SyncScheduler: ObservableObject {
             syncProgress = "Syncing \"\(collection.name)\"..."
             print("[WallP] Syncing single collection: \(collection.name)")
 
-            let newImages = try await imageCache.syncCollection(collection)
+            let newImages = try await imageCache.syncCollection(collection) { image in
+                await MainActor.run {
+                    self.handleImageDownloaded(image, collectionID: collectionID)
+                }
+            }
 
-            settings.cachedImages.append(contentsOf: newImages)
-            settings.collections[index].cachedImageIDs.append(contentsOf: newImages.map(\.id))
             settings.collections[index].lastSynced = Date()
-
             syncProgress = "Downloaded \(newImages.count) new images."
             print("[WallP] Downloaded \(newImages.count) new images for \"\(collection.name)\"")
-
-            let rotator = WallpaperRotator.shared
-            rotator.refreshImageList()
-            if !rotator.isRunning && !settings.isPaused {
-                rotator.start()
-                rotator.nextWallpaper()
-            }
         } catch {
             lastSyncError = error.localizedDescription
             syncProgress = ""
@@ -131,6 +122,30 @@ final class SyncScheduler: ObservableObject {
         }
 
         isSyncing = false
+    }
+
+    // MARK: - Progressive Image Handler
+
+    private func handleImageDownloaded(_ image: CachedImage, collectionID: UUID) {
+        let wasEmpty = settings.imagesForCollection(collectionID).isEmpty
+
+        settings.cachedImages.append(image)
+        if let idx = settings.collections.firstIndex(where: { $0.id == collectionID }) {
+            settings.collections[idx].cachedImageIDs.append(image.id)
+        }
+
+        // Only kick the rotator when this is the currently-displayed collection
+        // and it just got its first image — avoids spurious wallpaper changes during
+        // background collection syncs.
+        guard wasEmpty, settings.activeCollection?.id == collectionID else { return }
+
+        let rotator = WallpaperRotator.shared
+        rotator.refreshImageList()
+        if !rotator.isRunning && !settings.isPaused {
+            rotator.start()
+        }
+        rotator.nextWallpaper()
+        print("[WallP] First image for active collection — wallpaper set immediately")
     }
 
     // MARK: - Timer

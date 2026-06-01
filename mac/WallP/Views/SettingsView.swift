@@ -13,7 +13,10 @@ struct SettingsView: View {
     @State private var fetchError: String?
     @State private var cacheSize: String = "Calculating..."
     @State private var selectedWallhavenCollection: Int?
-    @State private var updateMode: Int = UserDefaults.standard.integer(forKey: "updateMode")
+    @State private var updateCheckSchedule: UpdateCheckSchedule = {
+        let raw = UserDefaults.standard.integer(forKey: "updateCheckSchedule")
+        return UpdateCheckSchedule(rawValue: raw) ?? .weekly
+    }()
 
     var body: some View {
         TabView {
@@ -325,19 +328,19 @@ struct SettingsView: View {
                 // Updates
                 VStack(alignment: .leading, spacing: 10) {
                     GroupBox {
-                        Picker("", selection: $updateMode) {
-                            Text("Auto-update (recommended)").tag(0)
-                            Text("Download updates, ask before installing").tag(1)
-                            Text("Disabled").tag(2)
+                        Picker("", selection: $updateCheckSchedule) {
+                            ForEach(UpdateCheckSchedule.allCases, id: \.self) { schedule in
+                                Text(schedule.displayName).tag(schedule)
+                            }
                         }
                         .pickerStyle(.radioGroup)
                         .labelsHidden()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .onChange(of: updateMode) { _, newValue in
-                            UpdaterService.shared.updateMode = newValue
+                        .onChange(of: updateCheckSchedule) { _, newValue in
+                            UpdaterService.shared.updateCheckSchedule = newValue
                         }
                     } label: {
-                        Text("Automatic Updates")
+                        Text("Check for Updates")
                     }
 
                     GroupBox {

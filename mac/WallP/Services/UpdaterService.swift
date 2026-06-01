@@ -1,6 +1,20 @@
 @preconcurrency import Sparkle
 import Foundation
 
+enum UpdateCheckSchedule: Int, CaseIterable {
+    case daily = 86400
+    case weekly = 604800
+    case manual = 0
+
+    var displayName: String {
+        switch self {
+        case .daily: "Every day"
+        case .weekly: "Every week"
+        case .manual: "Manual only"
+        }
+    }
+}
+
 @Observable
 @MainActor
 final class UpdaterService {
@@ -8,12 +22,14 @@ final class UpdaterService {
 
     private let controller: SPUStandardUpdaterController
 
-    /// 0 = auto-update, 1 = download + ask, 2 = disabled
-    var updateMode: Int {
-        get { UserDefaults.standard.integer(forKey: "updateMode") }
+    var updateCheckSchedule: UpdateCheckSchedule {
+        get {
+            let raw = UserDefaults.standard.integer(forKey: "updateCheckSchedule")
+            return UpdateCheckSchedule(rawValue: raw) ?? .weekly
+        }
         set {
-            UserDefaults.standard.set(newValue, forKey: "updateMode")
-            applyUpdateMode(newValue)
+            UserDefaults.standard.set(newValue.rawValue, forKey: "updateCheckSchedule")
+            applySchedule(newValue)
         }
     }
 
@@ -23,23 +39,22 @@ final class UpdaterService {
             updaterDelegate: nil,
             userDriverDelegate: nil
         )
-        applyUpdateMode(UserDefaults.standard.integer(forKey: "updateMode"))
+        let raw = UserDefaults.standard.integer(forKey: "updateCheckSchedule")
+        applySchedule(UpdateCheckSchedule(rawValue: raw) ?? .weekly)
     }
 
     func checkForUpdates() {
         controller.checkForUpdates(nil)
     }
 
-    private func applyUpdateMode(_ mode: Int) {
+    private func applySchedule(_ schedule: UpdateCheckSchedule) {
         let updater = controller.updater
-        switch mode {
-        case 0:  // auto-update
+        switch schedule {
+        case .daily, .weekly:
             updater.automaticallyChecksForUpdates = true
             updater.automaticallyDownloadsUpdates = true
-        case 1:  // download, ask to install
-            updater.automaticallyChecksForUpdates = true
-            updater.automaticallyDownloadsUpdates = false
-        default: // disabled
+            updater.updateCheckInterval = TimeInterval(schedule.rawValue)
+        case .manual:
             updater.automaticallyChecksForUpdates = false
             updater.automaticallyDownloadsUpdates = false
         }

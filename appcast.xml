@@ -13,6 +13,31 @@
              the edSignature and length values to paste in here. -->
 
         <item>
+            <title>WallP 1.3.4</title>
+            <pubDate>Sun, 01 Jun 2026 00:00:00 +0000</pubDate>
+            <sparkle:version>8</sparkle:version>
+            <sparkle:shortVersionString>1.3.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h3>WallP 1.3.4</h3>
+                <ul>
+                    <li>Wallpaper now changes immediately when the first image downloads — no more waiting for sync to complete</li>
+                    <li>Added "Every day" option to wallpaper rotation and sync schedules</li>
+                    <li>Auto-update schedule: choose Every Day, Every Week, or Manual</li>
+                    <li>Max images per collection increased from 500 to 1000</li>
+                    <li>Focus Filter: switching to a collection with no cached images now triggers an automatic download</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/v1.3.4/WallP-1.3.4.dmg"
+                sparkle:version="8"
+                sparkle:shortVersionString="1.3.4"
+                sparkle:edSignature="V/iI6De4Mj1bp2B2uBC788cUHdfIDpwwZtAMtsqCkZvSntbr0kO5bCrxafezF3Zq+SfSkK49Sz6MXABDENivCA=="
+                length="1800694"
+                type="application/x-apple-diskimage"/>
+        </item>
+
+        <item>
             <title>WallP 1.3.3</title>
             <pubDate>Fri, 23 May 2026 00:00:00 +0000</pubDate>
             <sparkle:version>7</sparkle:version>

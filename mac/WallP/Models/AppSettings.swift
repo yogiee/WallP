@@ -8,6 +8,7 @@ enum SyncInterval: Int, CaseIterable, Codable {
     case twoHours = 7200
     case fourHours = 14400
     case eightHours = 28800
+    case oneDay = 86400
     case manual = 0
 
     var displayName: String {
@@ -16,6 +17,7 @@ enum SyncInterval: Int, CaseIterable, Codable {
         case .twoHours: "Every 2 hours"
         case .fourHours: "Every 4 hours"
         case .eightHours: "Every 8 hours"
+        case .oneDay: "Every day"
         case .manual: "Manual only"
         }
     }
@@ -28,6 +30,7 @@ enum RotationInterval: Int, CaseIterable, Codable {
     case oneHour = 3600
     case twoHours = 7200
     case fourHours = 14400
+    case oneDay = 86400
 
     var displayName: String {
         switch self {
@@ -37,6 +40,7 @@ enum RotationInterval: Int, CaseIterable, Codable {
         case .oneHour: "Every 1 hour"
         case .twoHours: "Every 2 hours"
         case .fourHours: "Every 4 hours"
+        case .oneDay: "Every day"
         }
     }
 }
@@ -60,6 +64,7 @@ enum CacheLimit: Int, CaseIterable, Codable {
     case hundred = 100
     case twoHundred = 200
     case fiveHundred = 500
+    case oneThousand = 1000
 
     var displayName: String {
         "\(rawValue) images"
