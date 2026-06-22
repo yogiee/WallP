@@ -32,14 +32,18 @@ else
     XCODE_CONFIG="Debug"
 fi
 
+# Build WITHOUT signing. The app group capability makes Xcode's automatic
+# signing demand a provisioning profile, which we don't have (no paid account).
+# We re-sign ad-hoc by hand below — that gives a consistent ad-hoc signature
+# across the app AND the embedded Focus Filter extension, which macOS 26
+# requires (an Apple-Development-signed extension under an ad-hoc app fails to
+# load with "Could not load Focus Filter").
 xcodebuild \
     -project "$PROJECT_DIR/$APP_NAME.xcodeproj" \
     -scheme "$APP_NAME" \
     -configuration "$XCODE_CONFIG" \
     -derivedDataPath "$DERIVED_DIR" \
-    CODE_SIGN_IDENTITY="-" \
-    CODE_SIGN_STYLE=Manual \
-    AD_HOC_CODE_SIGNING_ALLOWED=YES \
+    CODE_SIGNING_ALLOWED=NO \
     clean build \
     2>&1 | grep -E "^(error:|warning:|Build succeeded|BUILD SUCCEEDED|BUILD FAILED|/.*error:|/.*warning:)" || true
 
@@ -47,6 +51,39 @@ BUILT_APP="$DERIVED_DIR/Build/Products/$XCODE_CONFIG/$APP_NAME.app"
 
 if [ ! -d "$BUILT_APP" ]; then
     echo "ERROR: Build failed — app not found at $BUILT_APP"
+    exit 1
+fi
+
+# Step 1b: Ad-hoc re-sign inside-out (deepest first, no --deep on the outer app).
+echo "  [1b/4] Ad-hoc signing..."
+APP_ENT="$PROJECT_DIR/WallP/WallP.entitlements"
+EXT_ENT="$PROJECT_DIR/WallP/AppIntentsExtension/WallPAppIntentsExtension.entitlements"
+SPK="$BUILT_APP/Contents/Frameworks/Sparkle.framework"
+
+# Sparkle ships pre-signed; re-sign its nested helpers first, then the framework.
+if [ -d "$SPK" ]; then
+    for item in \
+        "$SPK/Versions/Current/XPCServices/Downloader.xpc" \
+        "$SPK/Versions/Current/XPCServices/Installer.xpc" \
+        "$SPK/Versions/Current/Updater.app" \
+        "$SPK/Versions/Current/Autoupdate" \
+        "$SPK/Versions/Current/Sparkle"; do
+        [ -e "$item" ] && codesign --force --sign - --timestamp=none "$item" >/dev/null 2>&1
+    done
+    codesign --force --sign - --timestamp=none "$SPK" >/dev/null 2>&1
+fi
+
+# Extension must carry its sandbox + app-group entitlements (pluginkit rejects
+# it otherwise). Sign it before the outer app.
+codesign --force --sign - --entitlements "$EXT_ENT" --timestamp=none \
+    "$BUILT_APP/Contents/Extensions/WallPAppIntentsExtension.appex"
+
+# Finally the app shell, with its app-group entitlement.
+codesign --force --sign - --entitlements "$APP_ENT" --timestamp=none "$BUILT_APP"
+
+# Fail loudly if the signature isn't consistent end-to-end.
+if ! codesign --verify --deep --strict "$BUILT_APP" 2>/dev/null; then
+    echo "ERROR: ad-hoc signature verification failed"
     exit 1
 fi
 
