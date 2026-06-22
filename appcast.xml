@@ -13,6 +13,27 @@
              the edSignature and length values to paste in here. -->
 
         <item>
+            <title>WallP 1.3.5</title>
+            <pubDate>Mon, 22 Jun 2026 00:00:00 +0000</pubDate>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>1.3.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h3>WallP 1.3.5</h3>
+                <ul>
+                    <li>Fixed "Could not load Focus Filter" — the Focus Filter extension is now signed consistently with the app and loads correctly on macOS 26</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/v1.3.5/WallP-1.3.5.dmg"
+                sparkle:version="9"
+                sparkle:shortVersionString="1.3.5"
+                sparkle:edSignature="Mt+6rMgyVp/E9bW5pXzMrkfzpGvMhnhKvhCvyfud/fCo25VCrdId47FA8uN+yJfjDP7FPTq0awe/oo3UJqCcAw=="
+                length="1780781"
+                type="application/x-apple-diskimage"/>
+        </item>
+
+        <item>
             <title>WallP 1.3.4</title>
             <pubDate>Sun, 01 Jun 2026 00:00:00 +0000</pubDate>
             <sparkle:version>8</sparkle:version>
