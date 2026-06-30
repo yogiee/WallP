@@ -91,7 +91,7 @@ final class WallpaperRotator: ObservableObject {
         let screens = NSScreen.screens
         guard !screens.isEmpty else { return }
 
-        if screens.count > 1 {
+        if screens.count > 1 && settings.multiMonitorMode == .differentPerMonitor {
             // Multi-monitor: pick a different random image for each screen
             var indices: [Int]
             if orderedImages.count >= screens.count {
@@ -111,20 +111,27 @@ final class WallpaperRotator: ObservableObject {
             currentIndex = indices[mainIndex]
             currentImageID = orderedImages[currentIndex].id
         } else {
-            // Single monitor: use display order setting
-            switch settings.displayOrder {
-            case .random:
-                if shuffledIndices.isEmpty {
-                    reshuffleIndices()
-                }
-                currentIndex = shuffledIndices.removeFirst()
-            case .name, .dateCreated:
-                currentIndex = (currentIndex + 1) % orderedImages.count
-            }
-
+            // Single monitor, or "same image on all displays" — pick one image
+            // using the display-order setting and apply it to every screen.
+            currentIndex = nextOrderedIndex()
             let image = orderedImages[currentIndex]
-            applyWallpaper(image, to: screens[0])
+            for screen in screens {
+                applyWallpaper(image, to: screen)
+            }
             currentImageID = image.id
+        }
+    }
+
+    /// Advances to the next image index according to the active display order.
+    private func nextOrderedIndex() -> Int {
+        switch settings.displayOrder {
+        case .random:
+            if shuffledIndices.isEmpty {
+                reshuffleIndices()
+            }
+            return shuffledIndices.removeFirst()
+        case .name, .dateCreated:
+            return (currentIndex + 1) % orderedImages.count
         }
     }
 

@@ -199,6 +199,21 @@ struct SettingsView: View {
                         Text(order.displayName).tag(order)
                     }
                 }
+                .onChange(of: settings.displayOrder) { _, _ in
+                    // Re-sort the active image list so the new order takes effect now
+                    WallpaperRotator.shared.refreshImageList()
+                }
+            }
+
+            Section("Multiple Displays") {
+                Picker("When using multiple monitors", selection: $settings.multiMonitorMode) {
+                    ForEach(MultiMonitorMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                Text("\"Different image per display\" shows a unique wallpaper on each monitor. \"Same image on all displays\" mirrors one wallpaper across every monitor.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Wallhaven Sync") {

@@ -51,9 +51,15 @@ actor WallhavenAPIService {
     func fetchCollectionWallpapers(
         username: String,
         collectionID: Int,
-        page: Int = 1
+        page: Int = 1,
+        purity: String = "111"
     ) async throws -> WallhavenSearchResponse {
-        guard let url = URL(string: "\(baseURL)/collections/\(username)/\(collectionID)?page=\(page)") else {
+        // purity is a 3-digit SFW/Sketchy/NSFW mask. The API defaults to "100"
+        // (SFW only) when omitted, which silently drops sketchy/NSFW images the
+        // user added to their own collection. "111" requests everything; NSFW is
+        // only returned when the supplied API key permits it, so SFW-only keys
+        // are unaffected.
+        guard let url = URL(string: "\(baseURL)/collections/\(username)/\(collectionID)?page=\(page)&purity=\(purity)") else {
             throw WallhavenError.invalidURL
         }
 
@@ -67,10 +73,15 @@ actor WallhavenAPIService {
 
     // MARK: - Fetch All Wallpapers from Collection (paginated)
 
+    // maxPages is only a runaway-safety ceiling — the loop already stops at the
+    // collection's real lastPage. At 24 results/page (the API default) 50 pages
+    // covers 1,200 images, comfortably above the largest cache limit (1,000).
+    // The old value of 10 capped every collection at 240 images.
     func fetchAllCollectionWallpapers(
         username: String,
         collectionID: Int,
-        maxPages: Int = 10
+        maxPages: Int = 50,
+        purity: String = "111"
     ) async throws -> [WallhavenWallpaper] {
         var allWallpapers: [WallhavenWallpaper] = []
         var page = 1
@@ -79,7 +90,8 @@ actor WallhavenAPIService {
             let response = try await fetchCollectionWallpapers(
                 username: username,
                 collectionID: collectionID,
-                page: page
+                page: page,
+                purity: purity
             )
             allWallpapers.append(contentsOf: response.data)
 

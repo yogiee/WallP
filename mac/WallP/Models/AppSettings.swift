@@ -59,6 +59,18 @@ enum DisplayOrder: String, CaseIterable, Codable {
     }
 }
 
+enum MultiMonitorMode: String, CaseIterable, Codable {
+    case differentPerMonitor = "different"
+    case sameOnAll = "same"
+
+    var displayName: String {
+        switch self {
+        case .differentPerMonitor: "Different image per display"
+        case .sameOnAll: "Same image on all displays"
+        }
+    }
+}
+
 enum CacheLimit: Int, CaseIterable, Codable {
     case fifty = 50
     case hundred = 100
@@ -96,6 +108,9 @@ final class AppSettings: ObservableObject {
     @Published var cacheLimit: CacheLimit {
         didSet { defaults.set(cacheLimit.rawValue, forKey: "wallp_cache_limit") }
     }
+    @Published var multiMonitorMode: MultiMonitorMode {
+        didSet { defaults.set(multiMonitorMode.rawValue, forKey: "wallp_multimonitor_mode") }
+    }
 
     @Published var defaultCollectionID: UUID? {
         didSet { defaults.set(defaultCollectionID?.uuidString, forKey: "wallp_default_collection") }
@@ -129,6 +144,7 @@ final class AppSettings: ObservableObject {
         self.rotationInterval = RotationInterval(rawValue: defaults.integer(forKey: "wallp_rotation_interval")) ?? .thirtyMinutes
         self.displayOrder = DisplayOrder(rawValue: defaults.string(forKey: "wallp_display_order") ?? "") ?? .random
         self.cacheLimit = CacheLimit(rawValue: defaults.integer(forKey: "wallp_cache_limit")) ?? .hundred
+        self.multiMonitorMode = MultiMonitorMode(rawValue: defaults.string(forKey: "wallp_multimonitor_mode") ?? "") ?? .differentPerMonitor
         self.pauseOnSleep = defaults.object(forKey: "wallp_pause_sleep") as? Bool ?? true
         self.pauseOnLock = defaults.object(forKey: "wallp_pause_lock") as? Bool ?? true
         self.pauseOnScreenOff = defaults.object(forKey: "wallp_pause_screen_off") as? Bool ?? true
