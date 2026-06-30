@@ -67,12 +67,12 @@ struct MenuBarPopover: View {
             GlassEffectContainer {
                 HStack {
                     Button(action: { rotator.nextWallpaper() }) {
-                        Image(systemName: "shuffle")
+                        Image(systemName: isShuffleOrder ? "shuffle" : "forward.end.fill")
                             .frame(width: 28, height: 28)
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
-                    .help("Shuffle wallpaper")
+                    .help(isShuffleOrder ? "Shuffle wallpaper" : "Next wallpaper")
                     .disabled(settings.cachedImages.isEmpty)
 
                     Spacer()
@@ -194,6 +194,12 @@ struct MenuBarPopover: View {
     }
 
     // MARK: - Helpers
+
+    /// In random order the first control shuffles; in a fixed order it advances
+    /// to the next wallpaper in sequence, so the icon/label reflect that.
+    private var isShuffleOrder: Bool {
+        settings.displayOrder == .random
+    }
 
     private var collectionBinding: Binding<UUID> {
         Binding(
