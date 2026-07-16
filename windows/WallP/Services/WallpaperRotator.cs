@@ -154,6 +154,51 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
         }
     }
 
+    /// <summary>
+    /// Advances to the next image index according to the active display order.
+    /// Caller must already hold <see cref="_lock"/>, and <see cref="_orderedImages"/>
+    /// must be non-empty.
+    /// </summary>
+    private int NextOrderedIndexLocked()
+    {
+        if (_settings.DisplayOrder == DisplayOrder.Random)
+        {
+            if (_shuffledIndices.Count == 0) ReshuffleIndices();
+            var index = _shuffledIndices[0];
+            _shuffledIndices.RemoveAt(0);
+            return index;
+        }
+        return (_currentIndex + 1) % _orderedImages.Count;
+    }
+
+    /// <summary>
+    /// Applies one image across every monitor in a single COM call, blurring once
+    /// rather than once per monitor. Records one assignment per monitor so
+    /// <see cref="ReapplyCurrentAsync"/> can rebuild the blur paths consistently.
+    /// </summary>
+    private async Task ApplyToAllMonitorsAsync(
+        CachedImage image, IReadOnlyList<MonitorInfo> monitors, CancellationToken ct)
+    {
+        var sourcePath = _cache.PathFor(image);
+        if (!File.Exists(sourcePath))
+        {
+            Debug.WriteLine($"[WallP][Rotator] Missing on disk, skipping: {sourcePath}");
+            return;
+        }
+
+        try
+        {
+            var displayPath = await PrepareForDisplayAsync(sourcePath, monitorIndex: 0, ct);
+            await _wallpaper.SetWallpaperAllMonitorsAsync(displayPath, ct);
+            var newAssignments = monitors.Select(m => (m.Id, image)).ToList();
+            lock (_lock) { _monitorAssignments = newAssignments; }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[WallP][Rotator] SetWallpaper (all monitors) error: {ex.Message}");
+        }
+    }
+
     public async Task NextWallpaperAsync(CancellationToken ct = default)
     {
         IReadOnlyList<MonitorInfo> monitors;
@@ -166,7 +211,10 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
 
         if (monitors.Count == 0) return;
 
-        List<(MonitorInfo Monitor, CachedImage Image)> assignments;
+        // Set when a single image is mirrored across every monitor; stays null when
+        // each monitor gets its own image.
+        CachedImage? mirroredImage = null;
+        List<(MonitorInfo Monitor, CachedImage Image)> assignments = [];
         lock (_lock)
         {
             // Always pull the latest cached-image set — sync may have added images
@@ -176,7 +224,7 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
 
             if (_orderedImages.Count == 0) return;
 
-            if (monitors.Count > 1)
+            if (monitors.Count > 1 && _settings.MultiMonitorMode == MultiMonitorMode.DifferentPerMonitor)
             {
                 // Multi-monitor: unique random images when we have enough; allow repeats otherwise.
                 int[] indices;
@@ -206,21 +254,19 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
             }
             else
             {
-                // Single monitor: respect display order.
-                if (_settings.DisplayOrder == DisplayOrder.Random)
-                {
-                    if (_shuffledIndices.Count == 0) ReshuffleIndices();
-                    _currentIndex = _shuffledIndices[0];
-                    _shuffledIndices.RemoveAt(0);
-                }
-                else
-                {
-                    _currentIndex = _orderedImages.Count == 0 ? 0 : (_currentIndex + 1) % _orderedImages.Count;
-                }
-                assignments = [(monitors[0], _orderedImages[_currentIndex])];
+                // Single monitor, or "same image on all displays" — pick one image
+                // using the display-order setting and apply it to every monitor.
+                _currentIndex = NextOrderedIndexLocked();
+                mirroredImage = _orderedImages[_currentIndex];
             }
 
             CurrentImageId = _orderedImages[_currentIndex].Id;
+        }
+
+        if (mirroredImage is not null)
+        {
+            await ApplyToAllMonitorsAsync(mirroredImage, monitors, ct);
+            return;
         }
 
         var newAssignments = new List<(string, CachedImage)>(assignments.Count);
@@ -260,28 +306,17 @@ public sealed class WallpaperRotator : INotifyPropertyChanged, IDisposable
             CurrentImageId = image.Id;
         }
 
-        var sourcePath = _cache.PathFor(image);
-        if (!File.Exists(sourcePath))
+        IReadOnlyList<MonitorInfo> monitors;
+        try { monitors = _wallpaper.GetMonitors(); }
+        catch (Exception ex)
         {
-            Debug.WriteLine($"[WallP][Rotator] Previous: missing on disk: {sourcePath}");
+            Debug.WriteLine($"[WallP][Rotator] Previous: GetMonitors failed: {ex.Message}");
             return;
         }
 
-        try
-        {
-            var displayPath = await PrepareForDisplayAsync(sourcePath, monitorIndex: 0, ct);
-            await _wallpaper.SetWallpaperAllMonitorsAsync(displayPath, ct);
-
-            // All monitors share the same image now; record one entry per monitor so
-            // ReapplyCurrentAsync can rebuild the blur paths consistently.
-            var monitors = _wallpaper.GetMonitors();
-            var newAssignments = monitors.Select(m => (m.Id, image)).ToList();
-            lock (_lock) { _monitorAssignments = newAssignments; }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[WallP][Rotator] Previous error: {ex.Message}");
-        }
+        // Previous always mirrors one image across every monitor, regardless of
+        // MultiMonitorMode — there's no per-monitor history to step back through.
+        await ApplyToAllMonitorsAsync(image, monitors, ct);
     }
 
     public Task ShuffleAsync(CancellationToken ct = default) => NextWallpaperAsync(ct);

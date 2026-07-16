@@ -201,8 +201,7 @@ public sealed class SyncScheduler : INotifyPropertyChanged, IDisposable
         var wallpapers = await _api.FetchAllCollectionWallpapersAsync(
             collection.WallhavenUsername,
             collection.WallhavenCollectionId,
-            maxPages: 10,
-            ct);
+            ct: ct);
 
         var existingIds = _settings.CachedImages
             .Where(i => i.CollectionId == collection.Id)

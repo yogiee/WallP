@@ -9,6 +9,12 @@ public sealed class WallhavenApiService
 {
     private const string BaseUrl = "https://wallhaven.cc/api/v1";
 
+    // A 3-digit SFW/Sketchy/NSFW mask. The API defaults to "100" (SFW only) when
+    // omitted, which silently drops sketchy/NSFW images the user added to their
+    // own collection. "111" requests everything; NSFW is only returned when the
+    // supplied API key permits it, so SFW-only keys are unaffected.
+    private const string DefaultPurity = "111";
+
     private readonly AppSettings _settings;
     private readonly HttpClient _http;
 
@@ -32,21 +38,27 @@ public sealed class WallhavenApiService
     }
 
     public async Task<WallhavenSearchResponse> FetchCollectionWallpapersAsync(
-        string username, int collectionId, int page = 1, CancellationToken ct = default)
+        string username, int collectionId, int page = 1,
+        string purity = DefaultPurity, CancellationToken ct = default)
     {
-        var path = $"collections/{username}/{collectionId}?page={page}";
+        var path = $"collections/{username}/{collectionId}?page={page}&purity={purity}";
         return await SendAsync<WallhavenSearchResponse>(path, ct);
     }
 
+    // maxPages is only a runaway-safety ceiling — the loop already stops at the
+    // collection's real lastPage. At 24 results/page (the API default) 50 pages
+    // covers 1,200 images, comfortably above the largest cache limit (1,000).
+    // The old value of 10 capped every collection at 240 images.
     public async Task<List<WallhavenWallpaper>> FetchAllCollectionWallpapersAsync(
-        string username, int collectionId, int maxPages = 10, CancellationToken ct = default)
+        string username, int collectionId, int maxPages = 50,
+        string purity = DefaultPurity, CancellationToken ct = default)
     {
         var all = new List<WallhavenWallpaper>();
         var page = 1;
 
         while (page <= maxPages)
         {
-            var response = await FetchCollectionWallpapersAsync(username, collectionId, page, ct);
+            var response = await FetchCollectionWallpapersAsync(username, collectionId, page, purity, ct);
             all.AddRange(response.Data);
 
             if (page >= response.Meta.LastPage) break;
