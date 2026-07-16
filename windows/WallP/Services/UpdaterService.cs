@@ -37,12 +37,20 @@ public sealed class UpdaterService
         {
             if (_updater is null)
             {
-                _updater = new SparkleUpdater(
+                _updater = new ZipInstallingSparkleUpdater(
                     AppcastUrl,
                     new Ed25519Checker(SecurityMode.Strict, Ed25519PublicKey))
                 {
                     UIFactory = BuildUIFactory(),
                     LogWriter = new FileLogWriter(),
+                    // GitHub redirects release-asset downloads to an opaque UUID path, so
+                    // asking the server for the file name yields an extension-less temp file
+                    // and the installer step can't tell it's a zip. Derive the name from the
+                    // download link instead, which keeps the .zip.
+                    CheckServerFileName = false,
+                    // Defaults to false, which would leave the user with no running app
+                    // after the archive is extracted.
+                    RelaunchAfterUpdate = true,
                 };
                 ApplyMode();
             }
@@ -92,6 +100,35 @@ public sealed class UpdaterService
         {
             Debug.WriteLine($"[WallP][Updater] Check failed: {ex.Message}");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// NetSparkle only builds install commands for .exe/.msi/.msp on Windows — anything
+    /// else falls through to "execute the downloaded file", which for our portable .zip
+    /// means the batch script tries to run the archive, does nothing, and the app has
+    /// already quit by then. Extract over the install directory instead.
+    /// </summary>
+    private sealed class ZipInstallingSparkleUpdater : SparkleUpdater
+    {
+        public ZipInstallingSparkleUpdater(string appcastUrl, ISignatureVerifier verifier)
+            : base(appcastUrl, verifier)
+        {
+        }
+
+        protected override string GetWindowsInstallerCommand(string downloadFilePath)
+        {
+            if (!Path.GetExtension(downloadFilePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                return base.GetWindowsInstallerCommand(downloadFilePath);
+            }
+
+            // tar.exe ships in System32 on Windows 10 1803+ (we target 19041) and reads zip.
+            // The archive nests everything under a top-level WallP\ folder, so strip it.
+            // RestartExecutablePath carries a trailing separator, which would escape the
+            // closing quote and make tar chdir to a garbage path — trim it.
+            var installDir = RestartExecutablePath.TrimEnd('\\', '/');
+            return $"tar -xf \"{downloadFilePath}\" -C \"{installDir}\" --strip-components=1";
         }
     }
 

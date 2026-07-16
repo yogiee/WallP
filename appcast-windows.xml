@@ -5,6 +5,17 @@
         <description>Most recent updates to WallP for Windows</description>
         <language>en</language>
         <item>
+            <title>Version 0.1.5</title>
+            <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+            <description>Fixes automatic updates, which downloaded the new version but never installed it. Note: this fix lives in the updater itself, so it takes effect from this version onwards — if you are on 0.1.4 or earlier you will need to install this update manually one time.</description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/windows-v0.1.5/WallP-0.1.5.zip"
+                sparkle:version="0.1.5"
+                sparkle:signature="MxSqxwIoAneKh2yFB7XyX/Ja48xdPfhDYz5xVzIzh+Y/P6d67csl4wXOp8smd5bE7mS4mt/H8X9ItMhXYn/ZBw=="
+                length="11130628"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Version 0.1.4</title>
             <pubDate>Fri, 17 Jul 2026 09:00:00 +0000</pubDate>
             <description>Collections no longer stop at 240 images — large collections now sync completely. Adds a Multiple displays mode (a different image per monitor, or one image mirrored across all of them), a 1000-image cache limit option, and a Next button when Display order is By Name or By Date Created.</description>
