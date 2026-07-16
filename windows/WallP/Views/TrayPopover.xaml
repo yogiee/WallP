@@ -78,11 +78,10 @@
                        x:Name="ShuffleButton"
                        HorizontalAlignment="Stretch"
                        Margin="0,0,4,0"
-                       ToolTip="Shuffle"
                        Click="Shuffle_Click">
                 <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="ArrowShuffle24" />
-                    <ui:TextBlock Text="Shuffle" Margin="6,0,0,0" />
+                    <ui:SymbolIcon x:Name="ShuffleIcon" Symbol="ArrowShuffle24" />
+                    <ui:TextBlock x:Name="ShuffleLabel" Text="Shuffle" Margin="6,0,0,0" />
                 </StackPanel>
             </ui:Button>
             <ui:Button Grid.Column="1"

@@ -89,7 +89,9 @@ public partial class TrayPopover : FluentWindow
 
     private void OnSettingsChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(AppSettings.IsPaused) or nameof(AppSettings.DefaultCollectionId))
+        if (e.PropertyName is nameof(AppSettings.IsPaused)
+            or nameof(AppSettings.DefaultCollectionId)
+            or nameof(AppSettings.DisplayOrder))
         {
             Dispatcher.BeginInvoke(Refresh);
         }
@@ -143,6 +145,21 @@ public partial class TrayPopover : FluentWindow
         StatusText.Text = label;
         StatusPill.Background = pillBrush;
         StatusText.Foreground = Brushes.White;
+
+        // In random order the button shuffles; in a fixed order it advances to the
+        // next wallpaper in sequence, so the icon/label reflect that.
+        if (_settings.DisplayOrder == DisplayOrder.Random)
+        {
+            ShuffleIcon.Symbol = SymbolRegular.ArrowShuffle24;
+            ShuffleLabel.Text = "Shuffle";
+            ShuffleButton.ToolTip = "Shuffle wallpaper";
+        }
+        else
+        {
+            ShuffleIcon.Symbol = SymbolRegular.Next24;
+            ShuffleLabel.Text = "Next";
+            ShuffleButton.ToolTip = "Next wallpaper";
+        }
 
         // Pause/Resume button
         if (_settings.IsPaused)

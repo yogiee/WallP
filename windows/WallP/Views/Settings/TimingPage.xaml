@@ -47,6 +47,24 @@
                 </StackPanel>
             </ui:CardExpander>
 
+            <!-- Multiple displays -->
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <ui:TextBlock Text="Multiple displays" FontTypography="BodyStrong" />
+                        <ui:TextBlock Text="&quot;Different image per display&quot; shows a unique wallpaper on each monitor. &quot;Same image on all displays&quot; mirrors one wallpaper across every monitor."
+                                      FontTypography="Caption"
+                                      TextWrapping="Wrap"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="MultiMonitorModePicker"
+                          MinWidth="220"
+                          DisplayMemberPath="Display"
+                          SelectedValuePath="Value"
+                          SelectionChanged="MultiMonitorModePicker_SelectionChanged" />
+            </ui:CardControl>
+
             <!-- Wallhaven sync -->
             <ui:CardExpander Margin="0,0,0,12" IsExpanded="True">
                 <ui:CardExpander.Header>

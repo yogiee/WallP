@@ -5,6 +5,17 @@
         <description>Most recent updates to WallP for Windows</description>
         <language>en</language>
         <item>
+            <title>Version 0.1.4</title>
+            <pubDate>Fri, 17 Jul 2026 09:00:00 +0000</pubDate>
+            <description>Collections no longer stop at 240 images — large collections now sync completely. Adds a Multiple displays mode (a different image per monitor, or one image mirrored across all of them), a 1000-image cache limit option, and a Next button when Display order is By Name or By Date Created.</description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/windows-v0.1.4/WallP-0.1.4.zip"
+                sparkle:version="0.1.4"
+                sparkle:signature="PVta+kbHS7PMvlyUrqMSbQSR5Rg8OlKVzTELwXWkSBhyF+n98lKd7MAONUvZEamTqhJQggMXxeHOL4bGfYN2DA=="
+                length="11130281"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Version 0.1.3</title>
             <pubDate>Tue, 05 May 2026 09:00:00 +0000</pubDate>
             <description>Update dialog now uses a dark theme matching the rest of the app — dark window background, themed release-notes panel.</description>

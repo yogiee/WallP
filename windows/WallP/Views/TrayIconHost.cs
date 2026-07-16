@@ -65,6 +65,7 @@ public sealed class TrayIconHost : IDisposable
     }
 
     private MenuItem? _pauseItem;
+    private MenuItem? _shuffleItem;
 
     private ContextMenu BuildMenu()
     {
@@ -72,19 +73,22 @@ public sealed class TrayIconHost : IDisposable
 
         _pauseItem = MenuItem("Pause", _ => TogglePause());
         menu.Items.Add(_pauseItem);
-        menu.Items.Add(MenuItem("Shuffle", async _ => await SafeRun(() => _rotator.ShuffleAsync())));
+        _shuffleItem = MenuItem("Shuffle", async _ => await SafeRun(() => _rotator.ShuffleAsync()));
+        menu.Items.Add(_shuffleItem);
         menu.Items.Add(MenuItem("Sync now", async _ => await SafeRun(() => _sync.SyncNowAsync())));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Settings…", _ => OpenSettings()));
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Quit WallP", _ => Application.Current.Shutdown()));
 
-        // Refresh the Pause/Resume label every time the menu opens so it reflects
-        // current state even if pause was toggled from elsewhere.
+        // Refresh the Pause/Resume and Shuffle/Next labels every time the menu opens
+        // so they reflect current state even if changed from elsewhere.
         menu.Opened += (_, _) =>
         {
             if (_pauseItem is not null)
                 _pauseItem.Header = _settings.IsPaused ? "Resume" : "Pause";
+            if (_shuffleItem is not null)
+                _shuffleItem.Header = _settings.DisplayOrder == DisplayOrder.Random ? "Shuffle" : "Next";
         };
 
         return menu;

@@ -49,6 +49,13 @@ public sealed class AppSettings : INotifyPropertyChanged
         set => Set(ref _displayOrder, value);
     }
 
+    private MultiMonitorMode _multiMonitorMode = MultiMonitorMode.DifferentPerMonitor;
+    public MultiMonitorMode MultiMonitorMode
+    {
+        get => _multiMonitorMode;
+        set => Set(ref _multiMonitorMode, value);
+    }
+
     private CacheLimit _cacheLimit = CacheLimit.Hundred;
     public CacheLimit CacheLimit
     {

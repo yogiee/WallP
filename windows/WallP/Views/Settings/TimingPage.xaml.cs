@@ -24,10 +24,12 @@ public partial class TimingPage : Page
 
         RotationIntervalPicker.ItemsSource = EnumPickerHelper.ItemsFor<RotationInterval>();
         DisplayOrderPicker.ItemsSource = EnumPickerHelper.ItemsFor<DisplayOrder>();
+        MultiMonitorModePicker.ItemsSource = EnumPickerHelper.ItemsFor<MultiMonitorMode>();
         SyncIntervalPicker.ItemsSource = EnumPickerHelper.ItemsFor<SyncInterval>();
 
         RotationIntervalPicker.SelectedValue = _settings.RotationInterval;
         DisplayOrderPicker.SelectedValue = _settings.DisplayOrder;
+        MultiMonitorModePicker.SelectedValue = _settings.MultiMonitorMode;
         SyncIntervalPicker.SelectedValue = _settings.SyncInterval;
 
         DefaultCollectionPicker.ItemsSource = BuildCollectionItems();
@@ -67,6 +69,17 @@ public partial class TimingPage : Page
             _settings.DisplayOrder = value;
             _rotator.RefreshImageList();
             // Apply the next image right away so the new ordering takes visible effect.
+            _ = _rotator.NextWallpaperAsync();
+        }
+    }
+
+    private void MultiMonitorModePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initializing) return;
+        if (MultiMonitorModePicker.SelectedValue is MultiMonitorMode value && value != _settings.MultiMonitorMode)
+        {
+            _settings.MultiMonitorMode = value;
+            // Apply right away so the new mode takes visible effect across displays.
             _ = _rotator.NextWallpaperAsync();
         }
     }

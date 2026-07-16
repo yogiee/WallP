@@ -28,12 +28,19 @@ public enum DisplayOrder
     [Description("By Date Created")] DateCreated,
 }
 
+public enum MultiMonitorMode
+{
+    [Description("Different image per display")] DifferentPerMonitor,
+    [Description("Same image on all displays")] SameOnAll,
+}
+
 public enum CacheLimit
 {
     [Description("50 images")] Fifty = 50,
     [Description("100 images")] Hundred = 100,
     [Description("200 images")] TwoHundred = 200,
     [Description("500 images")] FiveHundred = 500,
+    [Description("1000 images")] OneThousand = 1000,
 }
 
 public enum ImageFormat
