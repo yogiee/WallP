@@ -1,17 +1,15 @@
 import AppIntents
 import Foundation
+import os
 
-// MARK: - Shared collection access (app group)
+private let logger = Logger(subsystem: "com.wallp.app.AppIntentsExtension", category: "FocusFilter")
 
-private enum FocusFilterStore {
-    static let collectionsKey = "wallp_collections"
-    static let appGroup = "group.com.wallp.app"
-
-    static func allCollections() -> [WallPCollection] {
-        guard let data = UserDefaults(suiteName: appGroup)?.data(forKey: collectionsKey),
-              let decoded = try? JSONDecoder().decode([WallPCollection].self, from: data)
-        else { return [] }
-        return decoded
+private func allCollections() -> [FocusFilterBridge.CollectionOption] {
+    do {
+        return try FocusFilterBridge.readCollections()
+    } catch {
+        logger.error("Could not read collections: \(error.localizedDescription, privacy: .public)")
+        return []
     }
 }
 
@@ -30,7 +28,7 @@ private enum FocusFilterStore {
 // perform(); intentionally no defaultResult() so we never force an unwanted default.
 struct WallpaperCollectionOptionsProvider: DynamicOptionsProvider {
     func results() async throws -> [String] {
-        FocusFilterStore.allCollections().map(\.name)
+        allCollections().map(\.name)
     }
 }
 
@@ -56,26 +54,24 @@ struct WallPFocusFilter: SetFocusFilterIntent {
 
     func perform() async throws -> some IntentResult {
         // Resolve the selected name back to a collection id. If the name no longer
-        // matches a collection (renamed/removed) the id is nil → empty string →
-        // the main app reverts to its default collection.
+        // matches a collection (renamed/removed) the id is nil and the main app
+        // falls back to its default collection.
         let id = collectionName.flatMap { name in
-            FocusFilterStore.allCollections().first { $0.name == name }?.id
+            allCollections().first { $0.name == name }?.id
         }
-        let value = id?.uuidString ?? ""
 
-        // UserDefaults(suiteName:) write is blocked by the sandbox
-        // ("user-preference-write outside container"). Writing a plain file via
-        // FileManager uses file-write-data access, which the app-group entitlement grants.
-        if let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.com.wallp.app"
-        ) {
-            let fileURL = containerURL.appendingPathComponent("wallp_focus_active_collection")
-            try? value.write(to: fileURL, atomically: true, encoding: .utf8)
+        do {
+            try FocusFilterBridge.writeActiveCollection(id)
+        } catch {
+            // Don't notify: the app would re-read the previous value.
+            logger.error("Could not record active collection: \(error.localizedDescription, privacy: .public)")
+            return .result()
         }
+        logger.notice("perform: collectionName=\(collectionName ?? "nil", privacy: .public) -> id=\(id?.uuidString ?? "nil", privacy: .public)")
 
         CFNotificationCenterPostNotification(
             CFNotificationCenterGetDarwinNotifyCenter(),
-            CFNotificationName("com.wallp.app.focusFilterChanged" as CFString),
+            CFNotificationName(FocusFilterBridge.notificationName as CFString),
             nil, nil, true
         )
         return .result()

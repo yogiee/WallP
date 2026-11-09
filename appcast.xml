@@ -13,6 +13,30 @@
              the edSignature and length values to paste in here. -->
 
         <item>
+            <title>WallP 1.4.1</title>
+            <pubDate>Mon, 09 Nov 2026 00:00:00 +0000</pubDate>
+            <sparkle:version>12</sparkle:version>
+            <sparkle:shortVersionString>1.4.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <h3>WallP 1.4.1</h3>
+                <ul>
+                    <li>Fixed Focus filters on macOS 27: each Focus now switches to its selected collection again, instead of staying on the default. If a Focus is already on when you update, switch Focus once to apply it.</li>
+                    <li>A Focus no longer replaces your default collection. Turning it off returns to the default you chose.</li>
+                    <li>The wallpaper no longer changes on a Focus switch if the collection stays the same.</li>
+                    <li>The menu bar now shows the collection in use, including one set by a Focus.</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/yogiee/WallP/releases/download/v1.4.1/WallP-1.4.1.dmg"
+                sparkle:version="12"
+                sparkle:shortVersionString="1.4.1"
+                sparkle:edSignature="+hIdYuDVIEJUJSWggOQy/eLRlg5XEDrgD7OdlJMxYxSP5wbE/bisGwGVQdJ0o+7sKyFqNkY7BGPpwExO8x4HAA=="
+                length="1791474"
+                type="application/x-apple-diskimage"/>
+        </item>
+
+        <item>
             <title>WallP 1.4.0</title>
             <pubDate>Tue, 30 Jun 2026 00:00:00 +0000</pubDate>
             <sparkle:version>11</sparkle:version>

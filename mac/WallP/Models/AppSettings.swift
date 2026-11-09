@@ -116,6 +116,10 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(defaultCollectionID?.uuidString, forKey: "wallp_default_collection") }
     }
 
+    /// Collection selected by the active Focus. Takes precedence over the default without
+    /// replacing it, and isn't persisted here: the bridge file is the source of truth.
+    @Published var focusOverrideCollectionID: UUID?
+
     @Published var pauseOnSleep: Bool {
         didSet { defaults.set(pauseOnSleep, forKey: "wallp_pause_sleep") }
     }
@@ -160,7 +164,7 @@ final class AppSettings: ObservableObject {
         self.cachedImages = []
         self.collections = loadCollections()
         self.cachedImages = loadCachedImages()
-        // Mirror to group suite immediately — didSet doesn't fire during init,
+        // Publish for the extension immediately — didSet doesn't fire during init,
         // so the extension would have stale/empty data until collections change.
         saveCollections()
     }
@@ -170,8 +174,11 @@ final class AppSettings: ObservableObject {
     private func saveCollections() {
         if let data = try? JSONEncoder().encode(collections) {
             defaults.set(data, forKey: collectionsKey)
-            // Mirror to shared app group so the App Intents extension can read it
-            UserDefaults(suiteName: "group.com.wallp.app")?.set(data, forKey: collectionsKey)
+        }
+        do {
+            try FocusFilterBridge.publishCollections(collections)
+        } catch {
+            print("[WallP] Could not publish collections for Focus filter: \(error.localizedDescription)")
         }
     }
 
@@ -202,6 +209,11 @@ final class AppSettings: ObservableObject {
     }
 
     var activeCollection: WallPCollection? {
+        // A deleted override collection falls through to the default.
+        if let id = focusOverrideCollectionID,
+           let override = collections.first(where: { $0.id == id }) {
+            return override
+        }
         if let id = defaultCollectionID {
             return collections.first { $0.id == id }
         }
