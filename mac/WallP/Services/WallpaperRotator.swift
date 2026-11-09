@@ -58,15 +58,33 @@ final class WallpaperRotator: ObservableObject {
 
     // MARK: - Switch Collection
 
+    /// The user explicitly picked a collection: it becomes the default and wins over
+    /// any Focus override until the next Focus change.
     func switchToCollection(_ collectionID: UUID) {
+        settings.focusOverrideCollectionID = nil
         settings.defaultCollectionID = collectionID
+        activateCurrentCollection()
+    }
+
+    /// A Focus selected a collection (nil = none, use the default). Leaves the default
+    /// untouched, and doesn't rotate if the effective collection is unchanged.
+    func applyFocusOverride(_ collectionID: UUID?) {
+        let previous = settings.activeCollection?.id
+        settings.focusOverrideCollectionID = collectionID
+        guard settings.activeCollection?.id != previous else { return }
+        activateCurrentCollection()
+    }
+
+    private func activateCurrentCollection() {
         refreshImageList()
         currentIndex = -1
 
         if orderedImages.isEmpty {
             // No cached images yet — trigger a sync; the progressive callback in
             // SyncScheduler will set the wallpaper as soon as the first image arrives.
-            Task { await SyncScheduler.shared.syncCollection(collectionID) }
+            if let collectionID = settings.activeCollection?.id {
+                Task { await SyncScheduler.shared.syncCollection(collectionID) }
+            }
             return
         }
 
@@ -74,12 +92,6 @@ final class WallpaperRotator: ObservableObject {
         // Reset the rotation timer so the full interval starts from now
         if isRunning {
             scheduleTimer()
-        }
-    }
-
-    func switchToDefaultCollection() {
-        if let first = settings.collections.first {
-            switchToCollection(first.id)
         }
     }
 

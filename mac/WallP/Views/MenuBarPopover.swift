@@ -33,7 +33,7 @@ struct MenuBarPopover: View {
                     .pickerStyle(.menu)
                     .font(.caption)
                     Spacer()
-                    if let id = settings.defaultCollectionID {
+                    if let id = settings.activeCollection?.id {
                         Text("\(settings.imagesForCollection(id).count) images")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -203,7 +203,7 @@ struct MenuBarPopover: View {
 
     private var collectionBinding: Binding<UUID> {
         Binding(
-            get: { settings.defaultCollectionID ?? (settings.collections.first?.id ?? UUID()) },
+            get: { settings.activeCollection?.id ?? UUID() },
             set: { rotator.switchToCollection($0) }
         )
     }

@@ -8,5 +8,9 @@
 	<array>
 		<string>group.com.wallp.app</string>
 	</array>
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+	<array>
+		<string>/Library/Application Support/WallP/FocusFilter/</string>
+	</array>
 </dict>
 </plist>
